@@ -1,10 +1,9 @@
 from datetime import datetime
 
-from django.contrib.auth.base_user import AbstractBaseUser
-from django.contrib.auth.models import PermissionsMixin
 from django.db import models
+
+from account import models as account_models
 from core import managers, messages
-from django.contrib.postgres.fields import CITextField
 
 
 def generate_filename(instance, filename):
@@ -18,93 +17,8 @@ def upload_to(instance, filename):
     return f'media/{generate_filename(instance, filename)}'
 
 
-# Create your models here.
-class User(AbstractBaseUser, PermissionsMixin):
-    username = None
-    cellphone = models.CharField(
-        null=True,
-        max_length=64,
-        unique=True,
-        error_messages={'unique': messages.CELLPHONE_ALREADY_EXISTS}
-    )
-    password = models.CharField(
-        null=False,
-        max_length=104,
-    )
-    name = models.CharField(
-        null=True,
-        max_length=256
-    )
-    email = models.EmailField(
-        null=True,
-        max_length=256,
-        unique=True,
-        error_messages={'unique': messages.EMAIL_ALREADY_EXISTS}
-    )
-    last_login = models.DateTimeField(
-        null=True
-    )
-    is_superuser = models.BooleanField(
-        null=True,
-        default=False
-    )
-    is_staff = models.BooleanField(
-        null=True,
-        default=False
-    )
-    avatar = models.ImageField(
-        upload_to=upload_to,
-        null=True
-    )
-    file_name = models.CharField(null=True)
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        null=True,
-    )
-    modified_at = models.DateTimeField(
-        auto_now=True,
-        null=True,
-    )
-    is_active = models.BooleanField(
-        null=False,
-        default=True
-    )
 
-    objects = managers.UserManager()
-
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['name', 'cellphone', 'password']
-
-    class Meta:
-        db_table = 'user'
-        managed = True
-
-
-class ModelBase(models.Model):
-    id = models.BigAutoField(
-        null=False,
-        primary_key=True,
-    )
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        null=True,
-    )
-    modified_at = models.DateTimeField(
-        auto_now=True,
-        null=True,
-    )
-    active = models.BooleanField(
-        null=True,
-        default=True,
-    )
-
-    class Meta:
-        abstract = True
-        managed = True
-        default_permissions = ('add', 'change', 'delete', 'view')
-
-
-class Voter(ModelBase):
+class Voter(account_models.ModelBase):
     name = models.CharField(
         null=True,
         max_length=256
@@ -124,7 +38,7 @@ class Voter(ModelBase):
         db_table = 'voter'
 
 
-class Candidate(ModelBase):
+class Candidate(account_models.ModelBase):
     name = models.CharField(
         null=True,
         max_length=256
@@ -148,7 +62,7 @@ class Candidate(ModelBase):
         db_table = 'candidate'
 
 
-class Plate(ModelBase):
+class Plate(account_models.ModelBase):
     name = models.CharField(
         null=False,
         unique=True,
@@ -164,7 +78,7 @@ class Plate(ModelBase):
         db_table = 'plate'
 
 
-class PlateUser(ModelBase):
+class PlateUser(account_models.ModelBase):
     candidate = models.ForeignKey(
         to=Candidate,
         on_delete=models.DO_NOTHING,
@@ -192,7 +106,7 @@ class PlateUser(ModelBase):
         ]
 
 
-class EventVoting(ModelBase):
+class EventVoting(account_models.ModelBase):
     date = models.DateTimeField(
         null=True,
         verbose_name=('Date')
@@ -217,7 +131,7 @@ class EventVoting(ModelBase):
         db_table = 'event_voting'
 
 
-class VotingPlate(ModelBase):
+class VotingPlate(account_models.ModelBase):
     plate = models.ForeignKey(
         to=Plate,
         on_delete=models.DO_NOTHING,
@@ -239,7 +153,7 @@ class VotingPlate(ModelBase):
         ]
 
 
-class VotingUser(ModelBase):
+class VotingUser(account_models.ModelBase):
     voting = models.ForeignKey(
         to=EventVoting,
         on_delete=models.DO_NOTHING,
@@ -271,7 +185,7 @@ class VotingUser(ModelBase):
         ]
 
 
-class ResumeVote(ModelBase):
+class ResumeVote(account_models.ModelBase):
     voting = models.ForeignKey(
         to=EventVoting,
         on_delete=models.DO_NOTHING,

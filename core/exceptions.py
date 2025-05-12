@@ -56,11 +56,6 @@ class NoRecordFoundException(APIException):
     default_detail = messages.NO_RECORD_FOUND
 
 
-class MinioException(APIException):
-    status_code = 400
-    default_detail = messages.MINIO_FAILURE
-
-
 class GroupDoesNotExistsException(APIException):
     status_code = 400
     default_detail = messages.GROUP_DOES_NOT_EXISTS
@@ -91,10 +86,6 @@ class TimeOverVotingException(APIException):
     default_detail = messages.TIME_OVER_VOTING
 
 
-class InvalidCredentialsException(APIException):
-    status_code = 405
-    default_detail = messages.INVALID_CREDENTIALS
-
 
 class DeleteVoteActiveException(APIException):
     status_code = 400
@@ -104,11 +95,6 @@ class DeleteVoteActiveException(APIException):
 class ExistVoteActiveException(APIException):
     status = 400
     default_detail = messages.EXISTS_VOTE_ACTIVE
-
-
-class UserNotExistException(APIException):
-    status = 400
-    default_detail = messages.USER_INVALID
 
 
 class UnableRemoveUserException(APIException):

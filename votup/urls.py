@@ -19,12 +19,14 @@ from django.shortcuts import redirect
 from django.urls import path, include, reverse
 from rest_framework_simplejwt.views import TokenRefreshView
 
-from core.viewset import CustomTokenObtainPairView
+from account.viewset import CustomTokenObtainPairView
 
 urlpatterns = [
     path('', lambda request: redirect(reverse('api-root'))),
     path('admin/', admin.site.urls),
+    path('api/account/', include('account.urls')),
+    path('api/account/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/account/refresh_token/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/votup/', include('core.urls'), name='api-root'),
-    path('api/votup/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/votup/refresh_token/', TokenRefreshView.as_view(), name='token_refresh'),
+
 ]

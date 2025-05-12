@@ -9,13 +9,11 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-import base64
 import os
 from datetime import timedelta
 from os.path import exists, join
+
 from dotenv import load_dotenv
-from pathlib import Path
-from storages.backends.s3boto3 import S3Boto3Storage
 
 # BASE_DIR = Path(__file__).resolve().parent.parent
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -47,6 +45,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
+    'account.apps.AccountConfig',
     'core.apps.CoreConfig',
     'django_filters',
     'corsheaders',
@@ -138,7 +137,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-AUTH_USER_MODEL = 'core.User'
+AUTH_USER_MODEL = 'account.User'
 
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (
