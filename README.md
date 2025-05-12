@@ -1,14 +1,14 @@
 # URNA MAGICA
 
 Pré-requisitos:
-[Docker](https://docs.docker.com/engine/install/), [Python 3.11.2](https://www.python.org/downloads/)
+[Docker](https://docs.docker.com/engine/install/), [Python 3.13](https://www.python.org/downloads/), [uv](https://docs.astral.sh/uv/getting-started/installation/#installation-methods).
 
 ## 1. Criando uma Virtual Environment
 
 1.2. Crie uma nova Virtual Environment:
 
 ``` sh
-python -m venv venv
+uv venv
 ```
 
 ## 2. Ativando a Virtual Environment
@@ -18,7 +18,7 @@ python -m venv venv
 Linux
 
 ``` sh
-source venv/bin/activate
+source .venv/bin/activate
 ```
 
 Windows
@@ -27,17 +27,9 @@ Windows
 .\venv\Scripts\activate
 ```
 
-## 3. Instalando as dependências
+## 3. Configurando banco de dados
 
-3.1. Para installar as dependências, digite:
-
-``` sh
-pip install -r requirements.txt
-```
-
-## 4. Configurando banco de dados
-
-4.1. Em `skeleton.conf` atualize as seguintes variáveis de conexão com o banco de dados:
+3.1. Em `skeleton.conf` atualize as seguintes variáveis de conexão com o banco de dados:
 
 ````
 DB_ENGINE=django.db.backends.postgresql_psycopg2
@@ -48,10 +40,10 @@ DB_USER=postgres
 DB_PASS=123456
 ````
 
-4.2. Crie as tabelas no seu banco de dados, digite:
+3.2. Crie as tabelas no seu banco de dados, digite:
 
 ``` sh
-py manage.py migrate
+uv run manage.py runserver
 ```
 
 
@@ -61,7 +53,7 @@ py manage.py migrate
 
 ````
 AWS_ACCESS_KEY_ID = "miniokey"
-AWS_SECRET_ACCESS_KEY = "fpf@1212"
+AWS_SECRET_ACCESS_KEY = "123456"
 AWS_STORAGE_BUCKET_NAME = "urn-magic"
 AWS_S3_ENDPOINT_URL = "http://localhost:9000" 
 ````
