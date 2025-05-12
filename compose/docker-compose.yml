@@ -24,7 +24,7 @@ services:
       - MINIO_ROOT_USER= minioadmin
       - MINIO_ROOT_PASSWORD= minioadmin
       - MINIO_ACCESS_KEY=FPF
-      - MINIO_SECRET_ACCESS_KEY=fpf@1212
+      - MINIO_SECRET_ACCESS_KEY=12345678
       - MINIO-BUCKET= bitlabs
     command: server --console-address ":9001" /data
     restart: always
