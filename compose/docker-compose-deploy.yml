@@ -1,0 +1,78 @@
+version: '3'
+services:
+
+  postgres:
+    image: postgres
+    hostname: postgres
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_DB=magic_urn
+      - POSTGRES_PASSWORD=123456
+    volumes:
+      - db-data2:/var/lib/postgresql/data
+    networks:
+      urn-api-network:
+        ipv4_address: 172.20.0.2
+
+  minio:
+    image: minio/minio
+    hostname: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER= minioadmin
+      - MINIO_ROOT_PASSWORD= minioadmin
+      - MINIO_ACCESS_KEY=FPF
+      - MINIO_SECRET_ACCESS_KEY=fpf@1212
+      - MINIO-BUCKET= bitlabs
+    command: server --console-address ":9001" /data
+    restart: always
+    volumes:
+      - minio_storage:/data
+    networks:
+      urn-api-network:
+        ipv4_address: 172.20.0.6
+
+  urn-api:
+    container_name: urn-api
+    image: registry.fpf.br/urna-magica/urn-api
+    command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8888"
+    depends_on:
+      - postgres
+    environment:
+      - POSTGRES_DB=magic_urn
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=123456
+      - DB_HOST=postgres
+    networks:
+      urn-api-network:
+        ipv4_address: 172.20.0.9
+    ports:
+      - "8888:8888"
+    restart: always
+
+  angular_web:
+    container_name: urn-web
+    image: registry.fpf.br/urna-magica/urn-web
+    depends_on:
+      - urn-api
+    ports:
+      - "8080:80"
+    restart: always
+
+networks:
+  urn-api-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16
+          gateway: 172.20.0.1
+
+
+volumes:
+  db-data2:
+  minio_storage:

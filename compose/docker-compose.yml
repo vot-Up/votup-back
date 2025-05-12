@@ -1,0 +1,73 @@
+version: '3'
+services:
+
+  postgres:
+    image: postgres
+    hostname: postgres
+    restart: always
+
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_DB=magic_urn
+      - POSTGRES_PASSWORD=123456
+    volumes:
+      - db-data1:/var/lib/postgresql/data
+
+  minio:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER= minioadmin
+      - MINIO_ROOT_PASSWORD= minioadmin
+      - MINIO_ACCESS_KEY=FPF
+      - MINIO_SECRET_ACCESS_KEY=fpf@1212
+      - MINIO-BUCKET= bitlabs
+    command: server --console-address ":9001" /data
+    restart: always
+    volumes:
+      - minio_storage1:/data
+#
+#  mariadb:
+#    hostname: mariadb
+#    restart: always
+#    image: bitnami/mariadb:10.6
+#    volumes:
+#      - 'mariadb_data:/bitnami/mariadb'
+#    ports:
+#      - 3306:3306
+#    environment:
+#      - MARIADB_ROOT_PASSWORD=fpf@2022
+#      - MARIADB_DATABASE=jasperreports
+#
+#  jasperreports:
+#    image: bitnami/jasperreports:8
+#    ports:
+#      - '8089:8080'
+#    restart: always
+#    volumes:
+#      - 'jasperreports_data:/bitnami/jasperreports'
+#    depends_on:
+#      - mariadb
+#    environment:
+#      - JASPERREPORTS_DATABASE_HOST=mariadb
+#      - JASPERREPORTS_DATABASE_PORT_NUMBER=3306
+#      - JASPERREPORTS_DATABASE_USER=root
+#      - JASPERREPORTS_DATABASE_NAME=jasperreports
+#      - JASPERREPORTS_DATABASE_PASSWORD=fpf@2022
+#      - JASPERREPORTS_USERNAME=magic_urn
+#      - JASPERREPORTS_PASSWORD=fpf@2022
+
+
+volumes:
+  db-data1:
+  minio_storage1:
+  mariadb_data:
+#  jasperreports_data:
+
+
+
+
+

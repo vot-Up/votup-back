@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.20.6.final using JasperReports Library version 6.20.6-5c96b6aa8a39ac1dc6b6bea4b81168e16dd39231  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="VotosPorEventoVotacaoPorChapa" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="dfa3e3ea-f098-4574-8f94-55a9769f1193">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="magic urn"/>
+	<property name="com.jaspersoft.studio.report.description" value=""/>
+	<style name="ZebradoCinza" mode="Opaque" backcolor="#D1D1D1"/>
+	<parameter name="idEventVoting" class="java.lang.String"/>
+	<parameter name="idPlate" class="java.lang.String"/>
+	<parameter name="server" class="java.lang.String">
+		<defaultValueExpression><![CDATA["172.20.0.6"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="port" class="java.lang.String">
+		<defaultValueExpression><![CDATA["9000"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="urlBase" class="java.lang.String">
+		<defaultValueExpression><![CDATA["urn-magic"]]></defaultValueExpression>
+	</parameter>
+	<queryString language="SQL">
+		<![CDATA[select ev.description,
+       p.name,
+       v2.name as eleitor,
+       v2.avatar as eleitor_avatar,
+       presidente.name as presidente,
+       presidente.avatar as presidente_avatar,
+       vice_presidente.name as vice_presidente,
+       vice_presidente.avatar as vice_presidente_avatar
+from voting_user v
+         inner join event_voting ev on ev.id = v.id_voting
+         inner join plate p on v.id_plate = p.id
+         inner join voter v2 on v.id_voter = v2.id
+         inner join plate_user pu on p.id = pu.id_plate and pu.type = 'P'
+         inner join candidate presidente on pu.id_candidate = presidente.id
+         inner join plate_user puv on p.id = puv.id_plate and puv.type = 'V'
+         inner join candidate vice_presidente on puv.id_candidate = vice_presidente.id
+where ev.id = $P{idEventVoting}::bigint and p.id = $P{idPlate}::bigint
+order by 3 desc]]>
+	</queryString>
+	<field name="description" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="description"/>
+		<property name="com.jaspersoft.studio.field.label" value="description"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="event_voting"/>
+	</field>
+	<field name="name" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="name"/>
+		<property name="com.jaspersoft.studio.field.label" value="name"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="plate"/>
+	</field>
+	<field name="eleitor" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="eleitor"/>
+		<property name="com.jaspersoft.studio.field.label" value="eleitor"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="voter"/>
+	</field>
+	<field name="eleitor_avatar" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="eleitor_avatar"/>
+		<property name="com.jaspersoft.studio.field.label" value="eleitor_avatar"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="voter"/>
+	</field>
+	<field name="presidente" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="presidente"/>
+		<property name="com.jaspersoft.studio.field.label" value="presidente"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="candidate"/>
+	</field>
+	<field name="presidente_avatar" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="presidente_avatar"/>
+		<property name="com.jaspersoft.studio.field.label" value="presidente_avatar"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="candidate"/>
+	</field>
+	<field name="vice_presidente" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="vice_presidente"/>
+		<property name="com.jaspersoft.studio.field.label" value="vice_presidente"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="candidate"/>
+	</field>
+	<field name="vice_presidente_avatar" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="vice_presidente_avatar"/>
+		<property name="com.jaspersoft.studio.field.label" value="vice_presidente_avatar"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="candidate"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="70" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="10" width="555" height="60" uuid="d7155037-0b9f-4f15-8071-2a6b465d5494"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Monospaced" size="26" isBold="true"/>
+				</textElement>
+				<text><![CDATA[VOTOS DA CHAPA]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="226" splitType="Stretch">
+			<rectangle>
+				<reportElement x="0" y="92" width="555" height="28" uuid="e01a24eb-d27a-4ce1-9c4f-10d90f31453b"/>
+			</rectangle>
+			<textField>
+				<reportElement x="0" y="10" width="554" height="30" uuid="0c9926e4-ae0e-4141-9e1e-6dff096c18e7"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Monospaced" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Nome da Votação:  "  + $F{description}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="40" width="555" height="30" uuid="ade2d19a-9aaa-43d0-9725-d719006d05d8"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Monospaced" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Nome da Chapa: "+ $F{name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="92" width="280" height="28" uuid="c50a5a10-5bbf-46d1-8094-264990934523"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Monospaced" size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Presidente: " + $F{presidente}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="280" y="91" width="274" height="28" uuid="a323f9a7-9887-453b-b784-221cbbb8118e"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Monospaced" size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Vice Presidente: " + $F{vice_presidente}]]></textFieldExpression>
+			</textField>
+			<image hAlign="Left" onErrorType="Blank">
+				<reportElement x="80" y="150" width="50" height="50" uuid="bfb62972-44d4-4cd7-873a-9c9d6db221b0"/>
+				<imageExpression><![CDATA["http://"+$P{server}+":"+$P{port}+"/"+$P{urlBase}+"/"+($F{presidente_avatar} == null ? "media/avatar.png" : $F{presidente_avatar})]]></imageExpression>
+			</image>
+			<image hAlign="Left" isLazy="true" onErrorType="Blank">
+				<reportElement x="380" y="150" width="50" height="50" uuid="a0dfc06b-0a6f-4a9e-9b6f-4a211402a437"/>
+				<imageExpression><![CDATA["http://" + $P{server} + ":" + $P{port} + "/" + $P{urlBase} + "/" + ($F{vice_presidente_avatar} == null ? "media/avatar.png" : $F{vice_presidente_avatar})]]></imageExpression>
+			</image>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="35" splitType="Stretch">
+			<rectangle>
+				<reportElement x="0" y="5" width="555" height="30" uuid="021073a3-bf84-461c-80af-ed24107527bd"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="0" y="5" width="554" height="30" uuid="229f90bd-e0be-4947-bf6c-24244ec79db9"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Monospaced" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nome do Eleitor]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="30" splitType="Stretch">
+			<rectangle>
+				<reportElement style="ZebradoCinza" x="0" y="0" width="555" height="30" uuid="bc847c11-9acf-408c-b8d7-1228fb23d005">
+					<printWhenExpression><![CDATA[new Boolean(($V{COLUMN_COUNT}.intValue() % 2) == 0)]]></printWhenExpression>
+				</reportElement>
+				<graphicElement>
+					<pen lineWidth="0.0"/>
+				</graphicElement>
+			</rectangle>
+			<textField>
+				<reportElement x="0" y="0" width="554" height="30" uuid="b5fdc3e2-5a39-44f5-bb63-577a6046a497"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Monospaced" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{eleitor}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="43" splitType="Stretch">
+			<textField pattern="dd, MMMMM, yyyy">
+				<reportElement x="0" y="13" width="555" height="30" uuid="cfcc2bf4-a70b-4599-a498-a07c75df810c"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Monospaced"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>
