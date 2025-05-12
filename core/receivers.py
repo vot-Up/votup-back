@@ -1,6 +1,7 @@
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.core.files.storage import default_storage
+from account import models as core_models
 
 from core import models
 
@@ -11,7 +12,7 @@ def deactivate_other_votings(sender, instance, created, **kwargs):
         models.EventVoting.objects.filter(active=True).exclude(pk=instance.pk).update(active=False)
 
 
-@receiver(post_delete, sender=models.User)
+@receiver(post_delete, sender=core_models.User)
 def delete_image(sender, instance, **kwargs):
     if instance.avatar:
         image_path = instance.avatar.name

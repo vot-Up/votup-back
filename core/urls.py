@@ -2,7 +2,6 @@ from rest_framework.routers import DefaultRouter
 from core import viewset
 
 router = DefaultRouter()
-router.register('user', viewset.UserViewSet)
 router.register('voter', viewset.VoterViewSet)
 router.register('candidate', viewset.CandidateViewSet)
 router.register('resume_vote', viewset.ResumeVoteViewSet)
