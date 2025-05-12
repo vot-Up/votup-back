@@ -1,0 +1,18 @@
+[flake8]
+exclude=
+    .git,
+    __pycache__,
+    docs/source/conf.py,
+    old,
+    build,
+    dist,
+    */settings.py,
+    */manage.py,
+    */migrations,
+    venv,
+    wait.py,
+    .venv
+    core/helpers.py
+    core/apps.py
+max-complexity=15
+max-line-length=160

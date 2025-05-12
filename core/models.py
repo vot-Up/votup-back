@@ -149,7 +149,7 @@ class Candidate(ModelBase):
 
 
 class Plate(ModelBase):
-    name = CITextField(
+    name = models.CharField(
         null=False,
         unique=True,
         max_length=54,
@@ -198,7 +198,7 @@ class EventVoting(ModelBase):
         verbose_name=('Date')
     )
 
-    description = CITextField(
+    description = models.CharField(
         null=False,
         blank=False,
         max_length=54,

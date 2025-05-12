@@ -8,7 +8,7 @@ from core import exceptions
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-compotence_conf = os.path.join(BASE_DIR, 'magic_urn.conf')
+compotence_conf = os.path.join(BASE_DIR, 'votup.conf')
 
 if exists(compotence_conf):
     load_dotenv(compotence_conf)
@@ -22,7 +22,7 @@ def generate_report_to_download(name: str, params: dict):
             f" {os.environ.get('SOURCE_LOCAL')}"  # /home/<seu user>/PycharmProjects/api
             f" VotosPorEventoVotacao1.pdf"
             f" {os.environ.get('DB_HOST')}"
-            f" magic_urn"
+            f" votup"
             f" 5432"
             f" postgres"
             f" 123456 "
@@ -50,7 +50,7 @@ def generate_report_to_plate_user_download(name: str, params: dict):
             f" /usr/app/reports"  # /home/<seu user>/PycharmProjects/api
             f" VotosPorEventoVotacaoPorChapa.pdf"
             f" {os.environ.get('DB_HOST')}"
-            f" magic_urn"
+            f" votup"
             f" 5432"
             f" postgres"
             f" 123456 "
@@ -77,7 +77,7 @@ def generate_report_to_resume_download(name: str, params: dict):
             f" {os.environ.get('SOURCE_LOCAL')}"  # /home/<seu user>/PycharmProjects/api
             f" VotosPorEventoVotacaoProvisoria.pdf"
             f" {os.environ.get('DB_HOST')}"
-            f" magic_urn"
+            f" votup"
             f" 5432"
             f" postgres"
             f" 123456 "

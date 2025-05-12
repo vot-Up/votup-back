@@ -55,7 +55,6 @@ class ResumeVotingSerializerParams(serializers.Serializer):
     event_vote = serializers.IntegerField(required=True)
 
 
-
 class VoterInPlateSerializerParams(serializers.Serializer):
     event_vote = serializers.IntegerField(required=True)
     plate = serializers.IntegerField(required=True)

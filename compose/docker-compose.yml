@@ -2,20 +2,21 @@ version: '3'
 services:
 
   postgres:
-    image: postgres
-    hostname: postgres
+    image: postgres:17
+    hostname: postgres-votup
     restart: always
 
     ports:
-      - 5432:5432
+      - "5432:5432"
     environment:
-      - POSTGRES_DB=magic_urn
+      - POSTGRES_DB=votup
       - POSTGRES_PASSWORD=123456
     volumes:
       - db-data1:/var/lib/postgresql/data
 
   minio:
-    image: minio/minio
+    image: minio/minio:latest
+    hostname: votup
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -57,7 +58,7 @@ services:
 #      - JASPERREPORTS_DATABASE_USER=root
 #      - JASPERREPORTS_DATABASE_NAME=jasperreports
 #      - JASPERREPORTS_DATABASE_PASSWORD=fpf@2022
-#      - JASPERREPORTS_USERNAME=magic_urn
+#      - JASPERREPORTS_USERNAME=votup
 #      - JASPERREPORTS_PASSWORD=fpf@2022
 
 

@@ -43,7 +43,7 @@ pip install -r requirements.txt
 DB_ENGINE=django.db.backends.postgresql_psycopg2
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=magic_urn
+DB_NAME=votup
 DB_USER=postgres
 DB_PASS=123456
 ````
@@ -57,7 +57,7 @@ py manage.py migrate
 
 ## Configurando serviço de image(minIO),
 
-- Em `magic_urn.conf` atualize as seguintes variáveis de configuração do serviço:
+- Em `votup.conf` atualize as seguintes variáveis de configuração do serviço:
 
 ````
 AWS_ACCESS_KEY_ID = "miniokey"
@@ -66,7 +66,7 @@ AWS_STORAGE_BUCKET_NAME = "urn-magic"
 AWS_S3_ENDPOINT_URL = "http://localhost:9000" 
 ````
 - Apos entrar na interface web do minio crie o bucket no `Create a bucket`:
-- Na aba `Acess Keys` crie as chaves que estao no `magic_urn.conf`
+- Na aba `Acess Keys` crie as chaves que estao no `votup.conf`
 
 ## Configurando serviço de pdf JASPER,
 

@@ -1,8 +1,10 @@
+from datetime import datetime
+
 from botocore.exceptions import ClientError
 from django.core.files.base import ContentFile
 from django.db import transaction
-from core import models, exceptions, serializers
-from datetime import datetime
+
+from core import models, exceptions
 
 
 class UserActions:
@@ -84,7 +86,7 @@ class EventVotingAction:
             events_voting = models.EventVoting.objects.filter(id=event_vote)
             events_voting.delete()
 
-        except Exception as e:
+        except Exception:
             raise exceptions.ForeignKeyException
 
 

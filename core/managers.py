@@ -2,8 +2,6 @@ from django.contrib.auth.base_user import BaseUserManager
 from django.db import models
 from django.db.models import Count
 
-from core import models as core_models
-
 
 class UserManager(BaseUserManager):
     use_in_migrations = True

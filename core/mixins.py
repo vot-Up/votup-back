@@ -1,6 +1,7 @@
 import importlib
 from copy import deepcopy
 
+
 class ViewSetExpandMixin:
     def make_queryset_expandable(self, request):
         expand_fields = request.query_params.get('expand', None)

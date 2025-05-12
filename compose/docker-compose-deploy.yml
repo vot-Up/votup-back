@@ -8,7 +8,7 @@ services:
     ports:
       - 5432:5432
     environment:
-      - POSTGRES_DB=magic_urn
+      - POSTGRES_DB=votup
       - POSTGRES_PASSWORD=123456
     volumes:
       - db-data2:/var/lib/postgresql/data
@@ -43,7 +43,7 @@ services:
     depends_on:
       - postgres
     environment:
-      - POSTGRES_DB=magic_urn
+      - POSTGRES_DB=votup
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=123456
       - DB_HOST=postgres

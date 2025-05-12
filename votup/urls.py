@@ -1,5 +1,5 @@
 """
-URL configuration for magic_urn project.
+URL configuration for votup project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/4.2/topics/http/urls/
@@ -24,7 +24,7 @@ from core.viewset import CustomTokenObtainPairView
 urlpatterns = [
     path('', lambda request: redirect(reverse('api-root'))),
     path('admin/', admin.site.urls),
-    path('api/magic_urn/', include('core.urls'), name='api-root'),
-    path('api/magic_urn/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/magic_urn/refresh_token/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/votup/', include('core.urls'), name='api-root'),
+    path('api/votup/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/votup/refresh_token/', TokenRefreshView.as_view(), name='token_refresh'),
 ]

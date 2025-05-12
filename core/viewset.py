@@ -1,5 +1,5 @@
 from django.db import transaction, IntegrityError
-from django.http import HttpResponse, FileResponse
+from django.http import HttpResponse
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
@@ -130,7 +130,7 @@ class VotingViewSet(ViewSetBase, ViewSetPermissions):
             try:
                 actions.EventVotingAction.delete_historic(kwargs.get('pk'))
                 return Response(data="Foi excluido com sucesso", status=200)
-            except Exception as e:
+            except Exception:
                 raise exceptions.DeleteVoteActiveException
         else:
             raise exceptions.DeleteVoteActiveException()

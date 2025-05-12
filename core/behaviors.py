@@ -1,7 +1,7 @@
+from django.db.models import F, Subquery, OuterRef, Count
 from fpdf import FPDF
-from django.db.models import F, Case, When, Value, CharField, Subquery, OuterRef, Count
+
 from core import models
-from core.models import VotingUser, Plate, Voter, PlateUser, Candidate
 
 
 class BaseBehavior:
@@ -12,7 +12,6 @@ class BaseBehavior:
 class PDFWithFooter(FPDF):
     def footer(self):
         # Get the page size
-        page_width = self.w
         page_height = self.h
 
         # Set the position of the footer at 15mm from the bottom
@@ -104,10 +103,8 @@ class VoterInPlate(BaseBehavior):
         # Set font and size for body
         pdf.set_font("Arial", size=16)
 
-
-
         pdf.ln(10)
-        pdf.cell(0, 10, "Eleitor", align="C",  border=1)
+        pdf.cell(0, 10, "Eleitor", align="C", border=1)
         pdf.ln(10)
 
         for content in self.get_body():
