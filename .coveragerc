@@ -1,0 +1,39 @@
+[run]
+omit =
+    */tests/*
+    */migrations/*
+    manage.py
+    */coverage.py
+    votup/urls.py
+    votup/admin.py
+    votup/apps.py
+    votup/messages.py
+    votup/models.py
+    votup/asgi.py
+    votup/settings.py
+    votup/wsgi.py
+    votup/__init__.py
+    core/__init__.py
+    core/admin.py
+    core/apps.py
+    core/filters.py
+    core/messages.py
+    core/models.py
+    core/params_serializer.py
+    core/receivers.py
+    core/serializers.py
+    core/urls.py
+    core/viewset.py
+    core/urls.py
+    core/exceptions.py
+    core/tests.py
+
+
+
+[report]
+precision = 5
+# ordena pelo nome do módulo
+sort = name
+
+[html]
+directory = htmlcov

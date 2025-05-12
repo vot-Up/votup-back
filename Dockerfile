@@ -1,4 +1,4 @@
-FROM python:3.11.2-slim as dependencies
+FROM python:3.12.2-slim as dependencies
 
 ENV APP_PATH /usr/app
 ENV TIMEZONE 'America/Manaus'
