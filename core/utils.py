@@ -1,4 +1,4 @@
-from core import serializers
+from account import serializers
 
 
 def get_user(user, request=None):

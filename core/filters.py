@@ -1,30 +1,11 @@
 from django.db.models import Subquery
 from django_filters import filterset
 
-from core import models, choices
+from account import filters as account_filters, choices
+from core import models
 
 
-class FilterBase(filterset.FilterSet):
-    id = filterset.CharFilter(field_name='id', lookup_expr=choices.EXACT)
-    created_at = filterset.DateTimeFilter(field_name='created_at', lookup_expr=choices.EXACT)
-    modified_at = filterset.DateTimeFilter(field_name='modified_at', lookup_expr=choices.EXACT)
-    active = filterset.BooleanFilter(field_name='active', lookup_expr=choices.EXACT)
-
-
-class UserFilter(FilterBase):
-    name = filterset.CharFilter(field_name='name', lookup_expr=choices.LIKE)
-    password = filterset.CharFilter(field_name='password', lookup_expr=choices.EXACT)
-    cellphone = filterset.CharFilter(field_name='cellphone', lookup_expr=choices.EXACT)
-    email = filterset.CharFilter(field_name='email', lookup_expr=choices.IEXACT)
-    is_active = filterset.BooleanFilter(field_name='is_active', lookup_expr=choices.EXACT)
-
-    class Meta:
-        model = models.User
-        fields = ['id', 'created_at', 'modified_at',
-                  'is_active', 'name', 'password', 'email']
-
-
-class VoterFilter(FilterBase):
+class VoterFilter(account_filters.FilterBase):
     name = filterset.CharFilter(field_name='name', lookup_expr=choices.LIKE)
     cellphone = filterset.CharFilter(field_name='cellphone', lookup_expr=choices.EXACT)
     exists = filterset.NumberFilter(method='exist')
@@ -39,7 +20,7 @@ class VoterFilter(FilterBase):
                   'active', 'name', 'exists']
 
 
-class CandidateFilter(FilterBase):
+class CandidateFilter(account_filters.FilterBase):
     name = filterset.CharFilter(field_name='name', lookup_expr=choices.LIKE)
     cellphone = filterset.CharFilter(field_name='cellphone', lookup_expr=choices.EXACT)
     exists = filterset.NumberFilter(method='exist')
@@ -74,7 +55,7 @@ class CandidateFilter(FilterBase):
                   'active', 'name', 'exists']
 
 
-class PlateFilter(FilterBase):
+class PlateFilter(account_filters.FilterBase):
     name = filterset.CharFilter(field_name='name', lookup_expr=choices.LIKE)
     exists = filterset.NumberFilter(method='exist')
     type = filterset.NumberFilter(method='isPorV')
@@ -100,7 +81,7 @@ class PlateFilter(FilterBase):
         fields = ['id', 'created_at', 'modified_at', 'active', 'name']
 
 
-class EventVotingFilter(FilterBase):
+class EventVotingFilter(account_filters.FilterBase):
     date = filterset.DateTimeFilter(field_name='date', lookup_expr=choices.EXACT)
     start_date = filterset.DateTimeFilter(field_name='date', lookup_expr=choices.GTE)
     final_date = filterset.DateTimeFilter(field_name='date', lookup_expr=choices.LTE)
@@ -119,7 +100,7 @@ class EventVotingFilter(FilterBase):
         fields = ['id', 'created_at', 'modified_at', 'active', 'date', 'description']
 
 
-class PlateUserFilter(FilterBase):
+class PlateUserFilter(account_filters.FilterBase):
     candidate = filterset.CharFilter(field_name='candidate', lookup_expr=choices.EXACT)
     plate = filterset.CharFilter(field_name='plate', lookup_expr=choices.EXACT)
     type = filterset.CharFilter(field_name='type', lookup_expr=choices.IEXACT)
@@ -129,7 +110,7 @@ class PlateUserFilter(FilterBase):
         fields = ['id', 'created_at', 'modified_at', 'active', 'candidate', 'plate', 'type']
 
 
-class VotingPlateFilter(FilterBase):
+class VotingPlateFilter(account_filters.FilterBase):
     plate = filterset.CharFilter(field_name='plate', lookup_expr=choices.EXACT)
     voting = filterset.CharFilter(field_name='voting', lookup_expr=choices.EXACT)
 
@@ -138,7 +119,7 @@ class VotingPlateFilter(FilterBase):
         fields = ['id', 'created_at', 'modified_at', 'active', 'plate', 'voting']
 
 
-class VotingUserFilter(FilterBase):
+class VotingUserFilter(account_filters.FilterBase):
     voting = filterset.CharFilter(field_name='voting', lookup_expr=choices.EXACT)
     plate = filterset.CharFilter(field_name='plate', lookup_expr=choices.EXACT)
     voter = filterset.CharFilter(field_name='voter', lookup_expr=choices.EXACT)
@@ -148,7 +129,7 @@ class VotingUserFilter(FilterBase):
         fields = ['id', 'created_at', 'modified_at', 'active', 'voting', 'plate', 'voter']
 
 
-class ResumeVoteFilter(FilterBase):
+class ResumeVoteFilter(account_filters.FilterBase):
     voting = filterset.CharFilter(field_name='voting', lookup_expr=choices.EXACT)
     plate = filterset.CharFilter(field_name='plate', lookup_expr=choices.EXACT)
 
