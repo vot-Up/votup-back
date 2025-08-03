@@ -7,8 +7,14 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 from reversion import revisions
 
-from core import mixins, params_serializer, messages, behaviors, helpers
-from core import models, serializers, filters, exceptions, actions
+from core import mixins, params_serializer, messages, helpers
+from core import filters, exceptions
+from core.dto.voter_dto import VoterDTO
+from core.repositories.voter_repository import VoterRepository
+from core.serializer import serializers
+from core.use_cases import actions, behaviors
+from core.models import models
+from core.use_cases.voter_use_case import GetVoter
 
 
 class ViewSetPermissions(ViewSet):
@@ -56,7 +62,29 @@ class VoterViewSet(ViewSetBase, ViewSetPermissions):
     serializer_class = serializers.VoterSerializer
     filterset_class = filters.VoterFilter
     ordering = ('-active', '-modified_at',)
-    permission_classes_by_action = {'create': (AllowAny,), 'partial_update': (AllowAny,), 'destroy': (AllowAny,)}
+    permission_classes_by_action = {
+        'create': (AllowAny,),
+        'partial_update': (AllowAny,),
+        'destroy': (AllowAny,),
+        'can_vote': (AllowAny,)}
+
+    @action(detail=False, methods=["GET"])
+    def can_vote(self, request):
+        cellphone = request.query_params.get("cellphone")
+        if not cellphone:
+            return Response(
+                {"detail": "O parâmetro 'cellphone' é obrigatório."},
+                status=400
+            )
+
+        use_case = GetVoter(repository=VoterRepository())
+
+        try:
+            voter = use_case.execute(cellphone=cellphone)
+            dto = VoterDTO.from_orm(voter).dict()
+            return Response(dto)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=400)
 
 
 class CandidateViewSet(ViewSetBase, ViewSetPermissions):

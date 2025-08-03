@@ -2,7 +2,7 @@ from django.db.models import Subquery
 from django_filters import filterset
 
 from account import filters as account_filters, choices
-from core import models
+from core.models import models
 
 
 class VoterFilter(account_filters.FilterBase):

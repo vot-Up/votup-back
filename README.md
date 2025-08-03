@@ -1,4 +1,4 @@
-# URNA MAGICA
+# VOTUP
 
 Pré-requisitos:
 [Docker](https://docs.docker.com/engine/install/), [Python 3.13](https://www.python.org/downloads/), [uv](https://docs.astral.sh/uv/getting-started/installation/#installation-methods).
