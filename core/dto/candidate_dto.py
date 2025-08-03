@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 
@@ -6,3 +8,4 @@ class CandidateDTO(BaseModel):
     name: str
     cellphone: str
     disable: bool
+    avatar_url: Optional[str] = None

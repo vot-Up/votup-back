@@ -13,6 +13,7 @@ from reversion import revisions
 from account import models, exceptions, params_serializer, actions, messages
 from core import filters, exceptions
 from core import mixins, params_serializer, messages, helpers
+from core.adapters.file_storage_adapter import S3FileStorageAdapter
 from core.dto.voter_dto import VoterDTO
 from core.models import models
 from core.repositories.candidate_repository import CandidateRepository
@@ -27,6 +28,7 @@ from core.use_cases.activite_plate_use_case import ActivatePlateUseCase
 from core.use_cases.check_plate_associate_use_case import CheckPlateAssociateUseCase
 from core.use_cases.delete_plate_user_use_case import DeleteUserPlateUseCase
 from core.use_cases.delete_voting_plate_use_case import DeleteVotingPlateUseCase
+from core.use_cases.update_candidate_avatar_use_case import UpdateCandidateAvatarUseCase
 from core.use_cases.voter_use_case import GetVoter
 
 logger = logging.getLogger(__name__)
@@ -121,6 +123,19 @@ class CandidateViewSet(ViewSetBase, ViewSetPermissions):
     filterset_class = filters.CandidateFilter
     ordering = ('-active', '-modified_at',)
     permission_classes_by_action = {'create': (AllowAny,), 'partial_update': (AllowAny,), 'destroy': (AllowAny,)}
+
+    @action(detail=True, methods=["post"], url_path="upload-avatar")
+    def upload_avatar(self, request, pk=None):
+        file = request.FILES.get("avatar")
+        if not file:
+            return Response({"detail": "Arquivo de imagem ausente."}, status=400)
+
+        use_case = UpdateCandidateAvatarUseCase(
+            storage=S3FileStorageAdapter(),
+            repository=CandidateRepository()
+        )
+        use_case.execute(candidate_id=pk, file=file.read(), filename=file.name)
+        return Response(status=204)
 
 
 @extend_schema(tags=['Plates'])
