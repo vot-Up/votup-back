@@ -51,6 +51,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'storages',
     'django.contrib.postgres',
+    'drf_spectacular',
+    'drf_spectacular_sidecar'
 ]
 
 MIDDLEWARE = [
@@ -62,6 +64,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+
 ]
 
 ROOT_URLCONF = 'votup.urls'
@@ -157,7 +160,112 @@ REST_FRAMEWORK = {
         'django_filters.rest_framework.DjangoFilterBackend',
         'rest_framework.filters.OrderingFilter',
     ),
-    'COERCE_DECIMAL_TO_STRING': False
+    'COERCE_DECIMAL_TO_STRING': False,
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'SWAGGER_UI_DIST': 'SIDECAR',  # shorthand to use the sidecar instead
+    'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
+    'REDOC_DIST': 'SIDECAR',
+    'TITLE': 'VOTUP API',
+    'DESCRIPTION': '''
+    API do sistema de votação VOTUP - Sistema para gerenciamento de eleições e votações eletrônicas.
+
+    ## Funcionalidades Principais:
+    - Gerenciamento de usuários, eleitores e candidatos
+    - Criação e gestão de chapas eleitorais
+    - Configuração de eventos de votação
+    - Sistema de votação eletrônica
+    - Relatórios e estatísticas de votação
+
+    ## Autenticação:
+    Este sistema utiliza JWT (JSON Web Tokens) para autenticação. 
+    Para acessar endpoints protegidos, inclua o token no header:
+    `Authorization: Bearer <seu_token>`
+
+    ## Arquitetura:
+    O projeto segue os princípios da Arquitetura Hexagonal (Ports and Adapters),
+    promovendo separação de responsabilidades e testabilidade.
+    ''',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'CONTACT': {
+        'name': 'VOTUP Team',
+        'email': 'admin@votup.com',
+    },
+    'LICENSE': {
+        'name': 'MIT License',
+    },
+    'TAGS': [
+        {
+            'name': 'Authentication',
+            'description': 'Endpoints para autenticação e gerenciamento de tokens'
+        },
+        {
+            'name': 'Users',
+            'description': 'Gerenciamento de usuários do sistema'
+        },
+        {
+            'name': 'Voters',
+            'description': 'Gerenciamento de eleitores'
+        },
+        {
+            'name': 'Candidates',
+            'description': 'Gerenciamento de candidatos'
+        },
+        {
+            'name': 'Plates',
+            'description': 'Gerenciamento de chapas eleitorais'
+        },
+        {
+            'name': 'Voting Events',
+            'description': 'Gerenciamento de eventos de votação'
+        },
+        {
+            'name': 'Voting Process',
+            'description': 'Processo de votação eletrônica'
+        },
+        {
+            'name': 'Reports',
+            'description': 'Relatórios e estatísticas'
+        },
+    ],
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SORT_OPERATIONS': False,
+    'ENUM_NAME_OVERRIDES': {
+        'ValidationErrorEnum': 'drf_spectacular.plumbing.ValidationErrorEnum.choices',
+    },
+    'POSTPROCESSING_HOOKS': [
+        'drf_spectacular.hooks.postprocess_schema_enums'
+    ],
+    'PREPROCESSING_HOOKS': [
+        'drf_spectacular.hooks.preprocess_exclude_path_format'
+    ],
+    'SCHEMA_PATH_PREFIX': '/api/',
+    'DEFAULT_GENERATOR_CLASS': 'drf_spectacular.generators.SchemaGenerator',
+    'SWAGGER_UI_SETTINGS': {
+        'deepLinking': True,
+        'persistAuthorization': True,
+        'displayOperationId': True,
+        'filter': True,
+        'requestSnippetsEnabled': True,
+        'showExtensions': True,
+        'showCommonExtensions': True,
+        'tryItOutEnabled': True,
+    },
+    'REDOC_UI_SETTINGS': {
+        'hideDownloadButton': False,
+        'expandResponses': 'all',
+        'pathInMiddlePanel': True,
+        'theme': {
+            'colors': {
+                'primary': {
+                    'main': '#1976d2'
+                }
+            }
+        }
+    },
 }
 
 MEDIA_URL = '/media/'

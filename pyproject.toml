@@ -17,6 +17,7 @@ dependencies = [
     "django-storages>=1.14.6",
     "djangorestframework-simplejwt>=5.4.0",
     "drf-flex-fields>=1.0.2",
+    "drf-spectacular[sidecar]>=0.28.0",
     "fpdf>=1.7.2",
     "idna>=3.10",
     "mccabe>=0.7.0",
