@@ -2,22 +2,18 @@ from django.db.models import Subquery
 from django_filters import filterset
 
 from account import filters as account_filters, choices
-from core import models
+from core.models import models
 
 
 class VoterFilter(account_filters.FilterBase):
     name = filterset.CharFilter(field_name='name', lookup_expr=choices.LIKE)
     cellphone = filterset.CharFilter(field_name='cellphone', lookup_expr=choices.EXACT)
-    exists = filterset.NumberFilter(method='exist')
     active = filterset.BooleanFilter(field_name='active', lookup_expr=choices.EXACT)
-    type_plate = filterset.CharFilter(method="get_type_plate")
-    plate_value = filterset.CharFilter(method="get_plate_value")
-    user_plate = filterset.CharFilter(method="get_user_plate")
 
     class Meta:
         model = models.Voter
         fields = ['id', 'created_at', 'cellphone', 'modified_at',
-                  'active', 'name', 'exists']
+                  'active', 'name']
 
 
 class CandidateFilter(account_filters.FilterBase):
@@ -58,7 +54,6 @@ class CandidateFilter(account_filters.FilterBase):
 class PlateFilter(account_filters.FilterBase):
     name = filterset.CharFilter(field_name='name', lookup_expr=choices.LIKE)
     exists = filterset.NumberFilter(method='exist')
-    type = filterset.NumberFilter(method='isPorV')
     active = filterset.BooleanFilter()
     voting = filterset.CharFilter(method="get_plate_voting")
 

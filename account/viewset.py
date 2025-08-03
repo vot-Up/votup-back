@@ -1,5 +1,5 @@
 # Create your views here.
-
+from drf_spectacular.utils import extend_schema_view
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
@@ -7,9 +7,13 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from account import models, serializers, filters, exceptions, params_serializer, actions, messages
+from core.schemas.schemas import USER_SCHEMAS, AUTH_SCHEMAS
 from core.viewset import ViewSetBase, ViewSetPermissions
 
 
+@extend_schema_view(
+    reset_password=USER_SCHEMAS['reset_password']
+)
 class UserViewSet(ViewSetBase, ViewSetPermissions):
     queryset = models.User.objects.all()
     serializer_class = serializers.UserSerializer
@@ -34,6 +38,9 @@ class UserViewSet(ViewSetBase, ViewSetPermissions):
         return Response(data={'message': messages.VALID_PASSWORD}, status=status.HTTP_200_OK)
 
 
+@extend_schema_view(
+    post=AUTH_SCHEMAS['login']
+)
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = serializers.CustomTokenObtainPairSerializer
 
