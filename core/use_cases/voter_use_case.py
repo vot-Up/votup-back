@@ -1,4 +1,4 @@
-from core.ports.voter_repository_ports import VoterRepositoryPort
+from core.ports.voter_repository_repository_port import VoterRepositoryPort
 
 
 class GetVoter:

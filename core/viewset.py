@@ -15,10 +15,18 @@ from core import filters, exceptions
 from core import mixins, params_serializer, messages, helpers
 from core.dto.voter_dto import VoterDTO
 from core.models import models
+from core.repositories.candidate_repository import CandidateRepository
+from core.repositories.plate_repository import PlateRepository
+from core.repositories.plate_user_repository import PlateUserRepository
 from core.repositories.voter_repository import VoterRepository
+from core.repositories.voting_plate_repository import VotingPlateRepository
 from core.schemas.schemas import VOTER_SCHEMAS, VOTING_SCHEMAS, REPORT_SCHEMAS
 from core.serializer import serializers
 from core.use_cases import actions, behaviors
+from core.use_cases.activite_plate_use_case import ActivatePlateUseCase
+from core.use_cases.check_plate_associate_use_case import CheckPlateAssociateUseCase
+from core.use_cases.delete_plate_user_use_case import DeleteUserPlateUseCase
+from core.use_cases.delete_voting_plate_use_case import DeleteVotingPlateUseCase
 from core.use_cases.voter_use_case import GetVoter
 
 logger = logging.getLogger(__name__)
@@ -98,7 +106,7 @@ class VoterViewSet(ViewSetBase, ViewSetPermissions):
 
         try:
             voter = use_case.execute(cellphone=cellphone)
-            dto = VoterDTO.from_orm(voter).dict()
+            dto = VoterDTO.model_validate(voter).model_dump()
             logger.info(f"Voter {cellphone} can vote: {not dto['has_voted']}")
             return Response(dto)
         except Exception as e:
@@ -129,16 +137,10 @@ class PlateViewSet(ViewSetBase, ViewSetPermissions):
     ordering = ('-active', '-modified_at',)
 
     def update(self, request, *args, **kwargs):
-        if 'active' in request.data:
-            if request.data.get('active'):
-                list_candidate = models.PlateUser.objects.filter(plate=self.get_object().id).values('candidate_id')
-                plate_list = models.PlateUser.objects.filter(
-                    candidate__in=list_candidate
-                ).values('plate_id').exclude(plate_id=self.get_object().id)
-
-                if models.Plate.objects.filter(id__in=plate_list, active=True).exists():
-                    logger.warning(f"Attempt to activate plate with candidates already in active plates")
-                    raise exceptions.PlateUserIsActiveException
+        if request.data.get('active'):
+            plate_id = self.get_object().id
+            use_case = ActivatePlateUseCase(repository=PlateRepository())
+            use_case.execute(plate_id)
 
         return super().update(request, *args, **kwargs)
 
@@ -212,7 +214,11 @@ class PlateUserViewSet(ViewSetBase, ViewSetPermissions):
         param_serializer.is_valid(raise_exception=True)
         logger.info(
             f"Removing user {param_serializer.validated_data['candidate']} from plate {param_serializer.validated_data['plate']}")
-        actions.PlateUserAction.delete_user_plate(**param_serializer.validated_data)
+
+        use_case = DeleteUserPlateUseCase(candidate_repository=CandidateRepository(),
+                                          plate_user_repository=PlateUserRepository())
+        data = param_serializer.validated_data
+        use_case.execute(candidate_id=data['candidate'], plate_id=data['plate'])
         return Response(status=200)
 
 
@@ -244,7 +250,8 @@ class VotingPlateViewSet(ViewSetBase, ViewSetPermissions):
         param_serializer.is_valid(raise_exception=True)
         logger.info(
             f"Removing plate {param_serializer.validated_data['plate']} from voting {param_serializer.validated_data['voting']}")
-        actions.VotingPlateAction.delete_voting_plate(**param_serializer.validated_data)
+        use_case = DeleteVotingPlateUseCase(repository=VotingPlateRepository())
+        use_case.execute(**param_serializer.validated_data)
         return Response(status=200)
 
     @extend_schema(
@@ -257,8 +264,9 @@ class VotingPlateViewSet(ViewSetBase, ViewSetPermissions):
     )
     @action(detail=False, methods=['GET'])
     def check_associate(self, request, *args, **kwargs):
-        id_associate = request.query_params['associate']
-        result = actions.VotingPlateAction.check_plate_voting(id_associate)
+        id_associate = int(request.query_params['associate'])
+        use_case = CheckPlateAssociateUseCase(repository=VotingPlateRepository())
+        result = use_case.execute(id_associate)
         return Response(data={"data": result}, status=200)
 
 

@@ -1,11 +1,10 @@
 from core.domain.voter import Voter as VoterDomain
 from core.models.models import Voter
-from core.ports.voter_repository_ports import VoterRepositoryPort
+from core.ports.voter_repository_repository_port import VoterRepositoryPort
 
 
 class VoterRepository(VoterRepositoryPort):
-    @staticmethod
-    def get_by_cellphone(cellphone: str) -> VoterDomain:
+    def get_by_cellphone(self,cellphone: str) -> VoterDomain:
         voter_obj = Voter.objects.get(cellphone=cellphone)
         return VoterDomain(
             id=voter_obj.id,
