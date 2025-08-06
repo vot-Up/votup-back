@@ -2,8 +2,8 @@ from rest_framework import serializers
 
 
 class PlateUserParamSerializer(serializers.Serializer):
-    plate = serializers.IntegerField(required=True)
     candidate = serializers.IntegerField(required=True)
+    plate = serializers.IntegerField(required=True)
 
 
 class VotingPlateParamSerializer(serializers.Serializer):

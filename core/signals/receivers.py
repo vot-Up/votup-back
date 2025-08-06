@@ -3,7 +3,7 @@ from django.dispatch import receiver
 from django.core.files.storage import default_storage
 from account import models as core_models
 
-from core import models
+from core.models import models
 
 
 @receiver(post_save, sender=models.EventVoting, dispatch_uid="deactivate_other_votings")

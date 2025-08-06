@@ -3,7 +3,7 @@
 import django.db.models.deletion
 from django.db import migrations, models
 
-import core.models
+import core.models.models
 
 
 class Migration(migrations.Migration):
@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
                 ('cellphone', models.CharField(
                     error_messages={'unique': 'Esse numéro de celular já está sendo usado por outro usuário!'},
                     max_length=64, null=True, unique=True)),
-                ('avatar', models.ImageField(null=True, upload_to=core.models.upload_to)),
+                ('avatar', models.ImageField(null=True, upload_to=core.models.models.upload_to)),
                 ('disabled', models.BooleanField(db_column='disabled', default=False)),
             ],
             options={
@@ -73,7 +73,7 @@ class Migration(migrations.Migration):
                 ('cellphone', models.CharField(
                     error_messages={'unique': 'Esse numéro de celular já está sendo usado por outro usuário!'},
                     max_length=64, null=True, unique=True)),
-                ('avatar', models.ImageField(null=True, upload_to=core.models.upload_to)),
+                ('avatar', models.ImageField(null=True, upload_to=core.models.models.upload_to)),
             ],
             options={
                 'db_table': 'voter',

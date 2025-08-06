@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "boto3>=1.38.14",
+    "boto3-stubs[full]==1.40.1",
     "certifi>=2025.4.26",
     "charset-normalizer>=3.4.2",
     "coverage>=7.8.0",
@@ -17,11 +18,14 @@ dependencies = [
     "django-storages>=1.14.6",
     "djangorestframework-simplejwt>=5.4.0",
     "drf-flex-fields>=1.0.2",
+    "drf-spectacular[sidecar]>=0.28.0",
     "fpdf>=1.7.2",
     "idna>=3.10",
     "mccabe>=0.7.0",
     "pillow>=11.2.1",
+    "pip>=25.2",
     "psycopg2-binary>=2.9.10",
+    "pydantic>=2.11.7",
     "pyjwt>=2.10.1",
     "pytest>=8.3.5",
     "pytest-django>=4.11.1",

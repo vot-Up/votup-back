@@ -49,10 +49,12 @@ class Candidate(account_models.ModelBase):
         unique=True,
         error_messages={'unique': messages.CELLPHONE_ALREADY_EXISTS}
     )
-    avatar = models.ImageField(
-        upload_to=upload_to,
-        null=True
+    avatar_url = models.CharField(
+        max_length=512,
+        null=True,
+        blank=True
     )
+
     disabled = models.BooleanField(
         default=False,
         db_column='disabled'

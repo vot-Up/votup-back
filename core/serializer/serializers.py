@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from account import serializers as account_serializers
-from core import models
+from core.models import models
 
 
 class VoterSerializer(account_serializers.SerializerBase):
@@ -25,7 +25,7 @@ class PlateSerializer(account_serializers.SerializerBase):
 
     expandable_fields = {
         'plate': (
-            'core.PlateUserPresidentsOrViceSerializer',
+            'core.serializer.PlateUserPresidentsOrViceSerializer',
             {'fields': ['id', 'candidate', 'type'], "many": True}
         ),
     }
@@ -46,7 +46,7 @@ class PlateUserSerializer(account_serializers.SerializerBase):
 
     expandable_fields = {
         'candidate': (
-            'core.CandidateSerializer',
+            'core.serializer.CandidateSerializer',
             {'fields': ['id', 'name']}
         ),
     }
@@ -68,11 +68,11 @@ class VotingPlateSerializer(account_serializers.SerializerBase):
 
     expandable_fields = {
         'plate': (
-            'core.PlateSerializer',
+            'core.serializer.PlateSerializer',
             {'fields': ['id', 'url', 'name', 'active', 'was_voted']}
         ),
         'voting': (
-            'core.EventVotingSerializer',
+            'core.serializer.EventVotingSerializer',
             {'fields': ['id', 'url', 'description', 'date']}
         )
     }
@@ -91,11 +91,11 @@ class ResumeVoteSerializer(account_serializers.SerializerBase):
 
     expandable_fields = {
         'plate': (
-            'core.PlateSerializer',
+            'core.serializer.PlateSerializer',
             {'fields': ['id', 'name']}
         ),
         'voting': (
-            'core.EventVotingSerializer',
+            'core.serializer.EventVotingSerializer',
             {'fields': ['id', 'description']}
         )
     }

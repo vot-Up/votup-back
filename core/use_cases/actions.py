@@ -1,30 +1,7 @@
 from datetime import datetime
 
-from core import models, exceptions
-
-
-class VotingPlateAction:
-    @staticmethod
-    def check_plate_voting(id_voting: int) -> bool:
-        plate_id_to_check = models.VotingPlate.objects.filter(
-            voting_id=id_voting
-        ).values('plate_id')
-        plates_associated = models.Plate.objects.filter(
-            votingplate__voting=id_voting,
-            id__in=plate_id_to_check
-        )
-
-        return plates_associated.values()
-
-    @staticmethod
-    def delete_voting_plate(voting: int, plate: int):
-        try:
-            models.VotingPlate.objects.filter(
-                voting=voting,
-                plate=plate
-            ).delete()
-        except Exception:
-            raise exceptions.UnableRemovePlateException()
+from core import exceptions
+from core.models import models
 
 
 class EventVotingAction:
@@ -124,22 +101,6 @@ class VotingAction:
         return None
 
 
-class PlateUserAction:
-
-    @staticmethod
-    def delete_user_plate(candidate: int, plate: int):
-        try:
-            models.PlateUser.objects.get(
-                candidate=candidate,
-                plate=plate
-            ).delete()
-
-            candidate_obj = models.Candidate.objects.get(pk=candidate)
-            candidate_obj.disabled = False
-            candidate_obj.save()
-
-        except Exception:
-            raise exceptions.UnableRemoveUserException()
 
 
 class ResumeVoteAction:
