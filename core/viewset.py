@@ -12,7 +12,7 @@ from reversion import revisions
 
 from account import models, exceptions, params_serializer, actions, messages
 from core import filters, exceptions
-from core import mixins, params_serializer, messages, helpers
+from core import mixins, params_serializer, messages
 from core.adapters.file_storage_adapter import S3FileStorageAdapter
 from core.dto.voter_dto import VoterDTO
 from core.models import models
@@ -25,6 +25,7 @@ from core.schemas.schemas import VOTER_SCHEMAS, VOTING_SCHEMAS, REPORT_SCHEMAS
 from core.serializer import serializers
 from core.use_cases import actions, behaviors
 from core.use_cases.activite_plate_use_case import ActivatePlateUseCase
+from core.use_cases.behaviors import VoteByPlateBehavior, GeneralVoteResultBehavior
 from core.use_cases.check_plate_associate_use_case import CheckPlateAssociateUseCase
 from core.use_cases.delete_plate_user_use_case import DeleteUserPlateUseCase
 from core.use_cases.delete_voting_plate_use_case import DeleteVotingPlateUseCase
@@ -312,14 +313,6 @@ class VotingUserViewSet(ViewSetBase, ViewSetPermissions):
         queryset = models.VotingUser.objects.ranking(voting_id=voting_id)
         return Response(data=queryset, status=status.HTTP_200_OK)
 
-    @extend_schema(
-        summary='Obter eleitores de uma chapa',
-        description='Retorna os eleitores que votaram em uma chapa específica.',
-        parameters=[
-            {'name': 'plate', 'in': 'query', 'required': True, 'schema': {'type': 'integer'}}
-        ],
-        responses={200: {'description': 'Lista de eleitores da chapa'}}
-    )
     @action(detail=False, methods=['GET'])
     def get_voter_plate(self, request):
         query_params_plate = request.query_params['plate']
@@ -334,93 +327,47 @@ class VotingUserViewSet(ViewSetBase, ViewSetPermissions):
         logger.info(f"Generating PDF report for voting event {params_serializers.initial_data['event_vote']}")
         behavior = behaviors.VotingUserBehavior(event_vote=params_serializers.initial_data['event_vote'])
         pdf_content = behavior.run()
-
-        response = HttpResponse(pdf_content, content_type='application/pdf', status=200)
-        response['Content-Disposition'] = 'inline; filename=resume.pdf'
-
+        response = HttpResponse(pdf_content, content_type='application/pdf')
+        response['Content-Disposition'] = 'inline; filename="voter_plate.pdf"'
         return response
 
     @action(detail=False, methods=['POST'])
     def resume_report(self, request, *args, **kwargs):
-        result_serializer = params_serializer.ResumeVotingSerializerParams(
-            data=request.data,
-            context={'request': request}
-        )
-        result_serializer.is_valid(raise_exception=True)
-        logger.info(f"Generating resume report for voting {result_serializer.validated_data['event_vote']}")
-        response = helpers.generate_report_to_download(
-            name="resume_vote",
-            params=result_serializer.validated_data
-        )
-        return response
+        serializer = params_serializer.ResumeVotingSerializerParams(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-    @extend_schema(
-        summary='Relatório de eleitores por chapa (PDF)',
-        description='Gera um relatório PDF dos eleitores que votaram em uma chapa específica.',
-        request={
-            'application/json': {
-                'type': 'object',
-                'properties': {
-                    'event_vote': {'type': 'integer'},
-                    'plate': {'type': 'integer'}
-                },
-                'required': ['event_vote', 'plate']
-            }
-        },
-        responses={
-            200: {
-                'description': 'Relatório PDF gerado',
-                'content': {'application/pdf': {'schema': {'type': 'string', 'format': 'binary'}}}
-            }
-        }
-    )
-    @action(detail=False, methods=['POST'])
-    def resume_report_plate_vote(self, request, *args, **kwargs):
-        result_serializer = params_serializer.VoterInPlateSerializerParams(
-            data=request.data,
-            context={'request': request}
-        )
-        result_serializer.is_valid(raise_exception=True)
-        logger.info(
-            f"Generating plate voter report for event {result_serializer.validated_data['event_vote']} and plate {result_serializer.validated_data['plate']}")
-        response = helpers.generate_report_to_plate_user_download(
-            name="resume_vote_voter_in_plate",
-            params=result_serializer.validated_data
-        )
-        return response
-
-    @extend_schema(
-        summary='Relatório PDF de eleitores por chapa',
-        description='Gera um relatório PDF simples dos eleitores de uma chapa.',
-        request={
-            'application/json': {
-                'type': 'object',
-                'properties': {
-                    'plate': {'type': 'integer'}
-                },
-                'required': ['plate']
-            }
-        },
-        responses={
-            200: {
-                'description': 'Relatório PDF gerado',
-                'content': {'application/pdf': {'schema': {'type': 'string', 'format': 'binary'}}}
-            }
-        }
-    )
-    @action(detail=False, methods=['POST'])
-    def get_voter_plate_pdf(self, request):
-        params_serializers = params_serializer.VoterPlateParamsSerializer(data=request.data)
-        params_serializers.is_valid(raise_exception=True)
-
-        logger.info(f"Generating voter plate PDF for plate {params_serializers.initial_data['plate']}")
-        behavior = behaviors.VoterInPlate(plate=params_serializers.initial_data['plate'])
+        event_vote_id = serializer.validated_data['event_vote']
+        behavior = GeneralVoteResultBehavior(event_vote_id)
         pdf_content = behavior.run()
 
-        response = HttpResponse(pdf_content, content_type='application/pdf', status=200)
-        response['Content-Disposition'] = 'inline; filename=resume.pdf'
+        return HttpResponse(pdf_content, content_type='application/pdf')
 
-        return response
+    @action(detail=False, methods=['POST'])
+    def resume_report_plate_vote(self, request):
+        serializer = params_serializer.VoterInPlateSerializerParams(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        event_vote = serializer.validated_data['event_vote']
+        plate = serializer.validated_data['plate']
+
+        logger.info(f"Generating plate vote report for event {event_vote} and plate {plate}")
+        behavior = VoteByPlateBehavior(event_vote=event_vote, plate=plate)
+        pdf_content = behavior.run()
+
+        if pdf_content is None:
+            return Response({"detail": "Nenhum dado encontrado."}, status=404)
+
+        return HttpResponse(pdf_content, content_type='application/pdf')
+
+    @action(detail=False, methods=['POST'])
+    def get_voter_plate_pdf(self, request):
+        serializer = params_serializer.VoterInPlateSerializerParams(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        plate = serializer.validated_data['plate']
+        logger.info(f"Generating plate vote report for plate {plate}")
+        behavior = behaviors.VoterInPlateResume(plate=plate)
+        pdf_content = behavior.run()
+        return HttpResponse(pdf_content, content_type='application/pdf')
 
 
 @extend_schema(tags=['Reports'])
@@ -460,15 +407,11 @@ class ResumeVoteViewSet(ViewSetBase, ViewSetPermissions):
         }
     )
     @action(detail=False, methods=['POST'])
-    def resume_report(self, request, *args, **kwargs):
-        result_serializer = params_serializer.ResumeVotingSerializerParams(
-            data=request.data,
-            context={'request': request}
-        )
-        result_serializer.is_valid(raise_exception=True)
-        logger.info(f"Generating resume report for voting {result_serializer.validated_data['event_vote']}")
-        response = helpers.generate_report_to_resume_download(
-            name="resume_vote",
-            params=result_serializer.validated_data
-        )
-        return response
+    def resume_report(self, request):
+        serializer = params_serializer.ResumeVotingSerializerParams(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        event_vote = serializer.validated_data['event_vote']
+        logger.info(f"Generating resumido report for event {event_vote}")
+        behavior = behaviors.ResumeVoterProvisory(event_vote=event_vote)
+        pdf_content = behavior.run()
+        return HttpResponse(pdf_content, content_type='application/pdf')
