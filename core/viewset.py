@@ -13,22 +13,24 @@ from reversion import revisions
 from account import models, exceptions, params_serializer, actions, messages
 from core import filters, exceptions
 from core import mixins, params_serializer, messages
-from core.adapters.file_storage_adapter import S3FileStorageAdapter
+from core.adapters.storage.file_storage_adapter import S3FileStorageAdapter
 from core.dto.voter_dto import VoterDTO
 from core.models import models
 from core.repositories.candidate_repository import CandidateRepository
 from core.repositories.plate_repository import PlateRepository
 from core.repositories.plate_user_repository import PlateUserRepository
+from core.repositories.report_repository import ReportRepository
 from core.repositories.voter_repository import VoterRepository
 from core.repositories.voting_plate_repository import VotingPlateRepository
 from core.schemas.schemas import VOTER_SCHEMAS, VOTING_SCHEMAS, REPORT_SCHEMAS
 from core.serializer import serializers
 from core.use_cases import actions, behaviors
 from core.use_cases.activite_plate_use_case import ActivatePlateUseCase
-from core.use_cases.behaviors import VoteByPlateBehavior, GeneralVoteResultBehavior
+from core.use_cases.behaviors import VoteByPlateBehavior
 from core.use_cases.check_plate_associate_use_case import CheckPlateAssociateUseCase
 from core.use_cases.delete_plate_user_use_case import DeleteUserPlateUseCase
 from core.use_cases.delete_voting_plate_use_case import DeleteVotingPlateUseCase
+from core.use_cases.generate_pdf.generate_general_vote_result_use_case import GenerateGeneralVoteResultUseCase
 from core.use_cases.update_candidate_avatar_use_case import UpdateCandidateAvatarUseCase
 from core.use_cases.voter_use_case import GetVoter
 
@@ -335,10 +337,11 @@ class VotingUserViewSet(ViewSetBase, ViewSetPermissions):
     def resume_report(self, request, *args, **kwargs):
         serializer = params_serializer.ResumeVotingSerializerParams(data=request.data)
         serializer.is_valid(raise_exception=True)
+        event_vote = serializer.validated_data['event_vote']
 
-        event_vote_id = serializer.validated_data['event_vote']
-        behavior = GeneralVoteResultBehavior(event_vote_id)
-        pdf_content = behavior.run()
+        logger.info(f"Generating resumido report for event {event_vote}")
+        use_case = GenerateGeneralVoteResultUseCase(report_repository=ReportRepository())
+        pdf_content = use_case.execute(event_vote_id=event_vote)
 
         return HttpResponse(pdf_content, content_type='application/pdf')
 
