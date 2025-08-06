@@ -1,5 +1,10 @@
+import datetime
+from io import BytesIO
+
+from django.db import connection
 from django.db.models import F, Subquery, OuterRef, Count
-from fpdf import FPDF
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
 
 from core.models import models
 
@@ -9,19 +14,23 @@ class BaseBehavior:
         raise NotImplementedError('You must subclass and implement the trace rule validation')
 
 
-class PDFWithFooter(FPDF):
+class PDFWithFooter:
+    def __init__(self):
+        self.buffer = BytesIO()
+        self.canvas = canvas.Canvas(self.buffer, pagesize=A4)
+        self.width, self.height = A4
+        self.y = self.height - 50
+
     def footer(self):
-        # Get the page size
-        page_height = self.h
+        self.canvas.setFont("Helvetica", 10)
+        self.canvas.drawCentredString(self.width / 2, 15, "votup Labs")
 
-        # Set the position of the footer at 15mm from the bottom
-        self.set_y(page_height - 15)
-
-        # Set font for the footer
-        self.set_font("Arial", size=10)
-
-        # Page number
-        self.cell(0, 10, "votup Labs", align="C")
+    def save(self):
+        self.footer()
+        self.canvas.showPage()
+        self.canvas.save()
+        self.buffer.seek(0)
+        return self.buffer.read()
 
 
 class VotingBehaviorPdfVoter(BaseBehavior):
@@ -29,8 +38,7 @@ class VotingBehaviorPdfVoter(BaseBehavior):
         self.header_text = header_text
 
     def get_header(self):
-        header = models.EventVoting.objects.get(pk=self.header_text, active=True)
-        return header
+        return models.EventVoting.objects.get(pk=self.header_text, active=True)
 
     def get_body(self):
         queryset = models.VotingUser.objects.filter(
@@ -44,38 +52,28 @@ class VotingBehaviorPdfVoter(BaseBehavior):
                     id=Subquery(
                         models.PlateUser.objects.filter(
                             type='P',
-                            plate__voting_user_plate=OuterRef('pk')  # Using OuterRef for voting_user.id
+                            plate__voting_user_plate=OuterRef('pk')
                         ).values('candidate')[:1]
                     )
                 ).values('name')[:1]
             )
         ).order_by()
-        results = queryset.values('voting_name', 'plate_name', 'presidente', 'vice')
-        return results
+        return queryset.values('voting_name', 'plate_name', 'presidente')
 
     def run(self):
         pdf = PDFWithFooter()
-        pdf.add_page()
+        c = pdf.canvas
+        c.setFont("Helvetica-Bold", 16)
+        c.drawCentredString(pdf.width / 2, pdf.y, self.get_header().description)
+        pdf.y -= 40
 
-        # Set font and size for header
-        pdf.set_font("Arial", style="B", size=12)
-
-        # Header
-        pdf.cell(200, 10, txt=self.get_header().description, ln=True, align="C")
-
-        # Set font and size for body
-        pdf.set_font("Arial", size=12)
-
-        for content in self.get_body():
-            pdf.multi_cell(0, 10, txt=content['plate_name'], align="C")
-            pdf.multi_cell(0, 10, txt=content['voting_name'], align="C")
-
-        # Set font and size for footer
-        pdf.set_font("Arial", size=10)
-
-        # Footer
-        pdf_content = pdf.output(dest='S').encode('latin1')
-        return pdf_content
+        c.setFont("Helvetica", 12)
+        for item in self.get_body():
+            c.drawString(40, pdf.y, f"Chapa: {item['plate_name']}")
+            pdf.y -= 20
+            c.drawString(40, pdf.y, f"Eleitor: {item['voting_name']}")
+            pdf.y -= 30
+        return pdf.save()
 
 
 class VoterInPlate(BaseBehavior):
@@ -83,83 +81,33 @@ class VoterInPlate(BaseBehavior):
         self.plate = plate
 
     def get_header(self):
-        header = models.Plate.objects.get(pk=self.plate)
-        return header
+        return models.Plate.objects.get(pk=self.plate)
 
     def get_body(self):
-        result = models.Voter.objects.filter(votinguser__plate=self.plate).values()
-        return result
-
-    def _make_pdf(self):
-        pdf = PDFWithFooter()
-        pdf.add_page()
-
-        # Set font and size for header
-        pdf.set_font("Arial", style="B", size=24)
-
-        # Header
-        pdf.cell(0, 10, txt=self.get_header().name, ln=True, align="C")
-
-        # Set font and size for body
-        pdf.set_font("Arial", size=16)
-
-        pdf.ln(10)
-        pdf.cell(0, 10, "Eleitor", align="C", border=1)
-        pdf.ln(10)
-
-        for content in self.get_body():
-            pdf.cell(0, 10, content['name'], border=1, align="C")
-            pdf.ln()
-
-        # Set font and size for footer
-        pdf.set_font("Arial", size=12)
-        # Footer
-        pdf_content = pdf.output(dest='S').encode('latin1')
-        return pdf_content
+        return models.Voter.objects.filter(votinguser__plate=self.plate).values('name')
 
     def run(self):
-        return self._make_pdf()
-
-
-class VoterInPlateResume(BaseBehavior):
-    def __init__(self, plate):
-        self.plate = plate
-
-    def get_header(self):
-        header = models.Plate.objects.get(pk=self.plate)
-        return header
-
-    def get_body(self):
-        result = models.Voter.objects.filter(votinguser__plate=self.plate).values()
-        return result
-
-    def _make_pdf(self):
         pdf = PDFWithFooter()
-        pdf.add_page()
+        c = pdf.canvas
 
-        # Set font and size for header
-        pdf.set_font("Arial", style="B", size=12)
+        c.setFont("Helvetica-Bold", 20)
+        c.drawCentredString(pdf.width / 2, pdf.y, self.get_header().name)
+        pdf.y -= 40
 
-        # Header
-        pdf.cell(200, 10, txt=self.get_header().name, ln=True, align="C")
+        c.setFont("Helvetica-Bold", 14)
+        c.drawString(40, pdf.y, "Eleitor")
+        pdf.y -= 20
 
-        # Set font and size for body
-        pdf.set_font("Arial", size=12)
+        c.setFont("Helvetica", 12)
+        for item in self.get_body():
+            c.drawString(40, pdf.y, item['name'])
+            pdf.y -= 20
 
-        pdf.cell(0, 10, txt="Eleitor", align="C")
+        return pdf.save()
 
-        for content in self.get_body():
-            pdf.cell(0, 10, txt=content['name'], align="C")
 
-        # Set font and size for footer
-        pdf.set_font("Arial", size=10)
-
-        # Footer
-        pdf_content = pdf.output(dest='S').encode('latin1')
-        return pdf_content
-
-    def run(self):
-        return self._make_pdf()
+class VoterInPlateResume(VoterInPlate):
+    pass  # Mesma estrutura do anterior, reaproveita o comportamento
 
 
 class ResumeVoterProvisory(BaseBehavior):
@@ -167,49 +115,31 @@ class ResumeVoterProvisory(BaseBehavior):
         self.event_vote = event_vote
 
     def get_header(self):
-        header = models.EventVoting.objects.get(pk=self.event_vote)
-        return header
+        return models.EventVoting.objects.get(pk=self.event_vote)
 
     def get_body(self):
-        result = models.ResumeVote.objects.all().values('plate__name', 'quantity')
-        return result
-
-    def _make_pdf(self):
-        pdf = PDFWithFooter()
-        pdf.add_page()
-
-        # Set font and size for header
-        pdf.set_font("Arial", style="B", size=24)
-
-        # Header
-        pdf.cell(0, 10, txt=self.get_header().description, ln=True, align="C")
-
-        # Set font and size for body
-        pdf.set_font("Arial", size=12)
-
-        pdf.ln(10)
-
-        cell_width = 95  # Adjust the cell width as needed
-
-        pdf.cell(cell_width, 10, "Chapa", border=1, align="C")
-        pdf.cell(cell_width, 10, "Quantidade de votos", border=1, align="C")
-
-        pdf.ln(10)
-
-        for content in self.get_body():
-            pdf.cell(cell_width, 10, content.get('plate__name'), border=1, align="C")
-            pdf.cell(cell_width, 10, str(content.get('quantity')), border=1, align="C")
-            pdf.ln()
-
-        # Set font and size for footer
-        pdf.set_font("Arial", size=10)
-
-        # Footer
-        pdf_content = pdf.output(dest='S').encode('latin1')
-        return pdf_content
+        return models.ResumeVote.objects.all().values('plate__name', 'quantity')
 
     def run(self):
-        return self._make_pdf()
+        pdf = PDFWithFooter()
+        c = pdf.canvas
+
+        c.setFont("Helvetica-Bold", 20)
+        c.drawCentredString(pdf.width / 2, pdf.y, self.get_header().description)
+        pdf.y -= 40
+
+        c.setFont("Helvetica-Bold", 14)
+        c.drawString(40, pdf.y, "Chapa")
+        c.drawString(300, pdf.y, "Quantidade de Votos")
+        pdf.y -= 20
+
+        c.setFont("Helvetica", 12)
+        for item in self.get_body():
+            c.drawString(40, pdf.y, item['plate__name'])
+            c.drawString(300, pdf.y, str(item['quantity']))
+            pdf.y -= 20
+
+        return pdf.save()
 
 
 class VotingUserBehavior(BaseBehavior):
@@ -217,47 +147,161 @@ class VotingUserBehavior(BaseBehavior):
         self.event_vote = event_vote
 
     def get_header(self):
-        header = models.EventVoting.objects.get(pk=self.event_vote)
-        return header
+        return models.EventVoting.objects.get(pk=self.event_vote)
 
     def get_body(self):
-        result = models.VotingUser.objects.all().values('plate__id', 'plate__name').annotate(
+        return models.VotingUser.objects.all().values('plate__id', 'plate__name').annotate(
             total=Count('*')
-        ).filter(voting_id=self.get_header().id, voter__isnull=False, ).order_by('-total')
-        return result
-
-    def _make_pdf(self):
-        pdf = PDFWithFooter()
-        pdf.add_page()
-
-        # Set font and size for header
-        pdf.set_font("Arial", style="B", size=24)
-
-        # Header
-        pdf.cell(0, 10, txt=self.get_header().description, ln=True, align="C")
-
-        # Set font and size for body
-        pdf.set_font("Arial", size=12)
-
-        cell_width = 95  # Adjust the cell width as needed
-
-        pdf.ln(10)
-        pdf.cell(95, 10, "Chapa", border=1, align="C")
-        pdf.cell(95, 10, "Quantidade de votos", border=1, align="C")
-
-        pdf.ln(10)
-
-        for content in self.get_body():
-            pdf.cell(cell_width, 10, content.get('plate__name'), border=1, align="C")
-            pdf.cell(cell_width, 10, str(content.get('total')), border=1, align="C")
-            pdf.ln()
-
-        # pdf.set_y(-1)
-        # pdf.set_font("Arial", size=10)
-        # pdf.cell(0, 10, txt="votup Labs", ln=True, align="C")
-        # Footer
-        pdf_content = pdf.output(dest='S').encode('latin1')
-        return pdf_content
+        ).filter(voting_id=self.get_header().id, voter__isnull=False).order_by('-total')
 
     def run(self):
-        return self._make_pdf()
+        pdf = PDFWithFooter()
+        c = pdf.canvas
+
+        c.setFont("Helvetica-Bold", 20)
+        c.drawCentredString(pdf.width / 2, pdf.y, self.get_header().description)
+        pdf.y -= 40
+
+        c.setFont("Helvetica-Bold", 14)
+        c.drawString(40, pdf.y, "Chapa")
+        c.drawString(300, pdf.y, "Quantidade de Votos")
+        pdf.y -= 20
+
+        c.setFont("Helvetica", 12)
+        for item in self.get_body():
+            c.drawString(40, pdf.y, item['plate__name'])
+            c.drawString(300, pdf.y, str(item['total']))
+            pdf.y -= 20
+
+        return pdf.save()
+
+
+class VoteByPlateBehavior(BaseBehavior):
+    def __init__(self, event_vote: int, plate: int):
+        self.event_vote = event_vote
+        self.plate = plate
+
+    def _get_data(self):
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                           SELECT ev.description,
+                                  p.name,
+                                  v2.name              AS eleitor,
+                                  v2.avatar,
+                                  presidente.name      AS presidente,
+                                  presidente.avatar_url,
+                                  vice_presidente.name AS vice_presidente,
+                                  vice_presidente.avatar_url
+                           FROM voting_user v
+                                    INNER JOIN event_voting ev ON ev.id = v.id_voting
+                                    INNER JOIN plate p ON v.id_plate = p.id
+                                    INNER JOIN voter v2 ON v.id_voter = v2.id
+                                    INNER JOIN plate_user pu ON p.id = pu.id_plate AND pu.type = 'P'
+                                    INNER JOIN candidate presidente ON pu.id_candidate = presidente.id
+                                    INNER JOIN plate_user puv ON p.id = puv.id_plate AND puv.type = 'V'
+                                    INNER JOIN candidate vice_presidente ON puv.id_candidate = vice_presidente.id
+                           WHERE ev.id = %s
+                             AND p.id = %s
+                           ORDER BY eleitor DESC
+                           """, [self.event_vote, self.plate])
+            return cursor.fetchall()
+
+    def run(self):
+        rows = self._get_data()
+
+        if not rows:
+            return None  # A view deve lidar com isso e retornar 404
+
+        buffer = BytesIO()
+        p = canvas.Canvas(buffer, pagesize=A4)
+        width, height = A4
+        y = height - 40
+
+        first_row = rows[0]
+        description = first_row[0]
+        plate_name = first_row[1]
+        presidente = first_row[4]
+        vice_presidente = first_row[6]
+
+        p.setFont("Helvetica-Bold", 20)
+        p.drawCentredString(width / 2, y, "VOTOS DA CHAPA")
+
+        y -= 40
+        p.setFont("Helvetica", 12)
+        p.drawString(40, y, f"Nome da Votação: {description}")
+
+        y -= 20
+        p.drawString(40, y, f"Nome da Chapa: {plate_name}")
+
+        y -= 20
+        p.drawString(40, y, f"Presidente: {presidente}")
+
+        y -= 20
+        p.drawString(40, y, f"Vice-Presidente: {vice_presidente}")
+
+        y -= 40
+        p.setFont("Helvetica-Bold", 12)
+        p.drawString(40, y, "Eleitores:")
+
+        y -= 20
+        p.setFont("Helvetica", 11)
+        for row in rows:
+            eleitor = row[2]
+            p.drawString(60, y, f"- {eleitor}")
+            y -= 15
+            if y < 50:
+                p.showPage()
+                y = height - 40
+
+        p.setFont("Helvetica", 10)
+        p.drawCentredString(width / 2, 30, f"Gerado em {datetime.datetime.now().strftime('%d/%m/%Y')}")
+        p.showPage()
+        p.save()
+
+        buffer.seek(0)
+        return buffer.read()
+
+
+class GeneralVoteResultBehavior(BaseBehavior):
+    def __init__(self, event_vote_id: int):
+        self.event_vote_id = event_vote_id
+
+    def _fetch_data(self):
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                           SELECT ev.description, p.name, COUNT(*)
+                           FROM voting_user v
+                                    INNER JOIN event_voting ev ON ev.id = v.id_voting
+                                    INNER JOIN plate p ON v.id_plate = p.id
+                           WHERE ev.id = %s
+                           GROUP BY ev.description, p.name
+                           ORDER BY p.name DESC
+                           """, [self.event_vote_id])
+            return cursor.fetchall()
+
+    def run(self):
+        rows = self._fetch_data()
+
+        buffer = BytesIO()
+        p = canvas.Canvas(buffer, pagesize=A4)
+        width, height = A4
+
+        y = height - 50
+        p.setFont("Helvetica-Bold", 16)
+        p.drawCentredString(width / 2, y, "RESULTADO GERAL DA VOTAÇÃO")
+
+        y -= 50
+        p.setFont("Helvetica", 12)
+
+        for description, plate_name, vote_count in rows:
+            p.drawString(50, y, f"Chapa: {plate_name} - Votos: {vote_count}")
+            y -= 20
+            if y < 50:
+                p.showPage()
+                y = height - 50
+
+        p.showPage()
+        p.save()
+        buffer.seek(0)
+
+        return buffer.read()

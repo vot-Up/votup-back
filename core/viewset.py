@@ -12,13 +12,26 @@ from reversion import revisions
 
 from account import models, exceptions, params_serializer, actions, messages
 from core import filters, exceptions
-from core import mixins, params_serializer, messages, helpers
+from core import mixins, params_serializer, messages
+from core.adapters.storage.file_storage_adapter import S3FileStorageAdapter
 from core.dto.voter_dto import VoterDTO
 from core.models import models
+from core.repositories.candidate_repository import CandidateRepository
+from core.repositories.plate_repository import PlateRepository
+from core.repositories.plate_user_repository import PlateUserRepository
+from core.repositories.report_repository import ReportRepository
 from core.repositories.voter_repository import VoterRepository
+from core.repositories.voting_plate_repository import VotingPlateRepository
 from core.schemas.schemas import VOTER_SCHEMAS, VOTING_SCHEMAS, REPORT_SCHEMAS
 from core.serializer import serializers
 from core.use_cases import actions, behaviors
+from core.use_cases.activite_plate_use_case import ActivatePlateUseCase
+from core.use_cases.behaviors import VoteByPlateBehavior
+from core.use_cases.check_plate_associate_use_case import CheckPlateAssociateUseCase
+from core.use_cases.delete_plate_user_use_case import DeleteUserPlateUseCase
+from core.use_cases.delete_voting_plate_use_case import DeleteVotingPlateUseCase
+from core.use_cases.generate_pdf.generate_general_vote_result_use_case import GenerateGeneralVoteResultUseCase
+from core.use_cases.update_candidate_avatar_use_case import UpdateCandidateAvatarUseCase
 from core.use_cases.voter_use_case import GetVoter
 
 logger = logging.getLogger(__name__)
@@ -98,7 +111,7 @@ class VoterViewSet(ViewSetBase, ViewSetPermissions):
 
         try:
             voter = use_case.execute(cellphone=cellphone)
-            dto = VoterDTO.from_orm(voter).dict()
+            dto = VoterDTO.model_validate(voter).model_dump()
             logger.info(f"Voter {cellphone} can vote: {not dto['has_voted']}")
             return Response(dto)
         except Exception as e:
@@ -113,6 +126,19 @@ class CandidateViewSet(ViewSetBase, ViewSetPermissions):
     filterset_class = filters.CandidateFilter
     ordering = ('-active', '-modified_at',)
     permission_classes_by_action = {'create': (AllowAny,), 'partial_update': (AllowAny,), 'destroy': (AllowAny,)}
+
+    @action(detail=True, methods=["post"], url_path="upload-avatar")
+    def upload_avatar(self, request, pk=None):
+        file = request.FILES.get("avatar")
+        if not file:
+            return Response({"detail": "Arquivo de imagem ausente."}, status=400)
+
+        use_case = UpdateCandidateAvatarUseCase(
+            storage=S3FileStorageAdapter(),
+            repository=CandidateRepository()
+        )
+        use_case.execute(candidate_id=pk, file=file.read(), filename=file.name)
+        return Response(status=204)
 
 
 @extend_schema(tags=['Plates'])
@@ -129,16 +155,10 @@ class PlateViewSet(ViewSetBase, ViewSetPermissions):
     ordering = ('-active', '-modified_at',)
 
     def update(self, request, *args, **kwargs):
-        if 'active' in request.data:
-            if request.data.get('active'):
-                list_candidate = models.PlateUser.objects.filter(plate=self.get_object().id).values('candidate_id')
-                plate_list = models.PlateUser.objects.filter(
-                    candidate__in=list_candidate
-                ).values('plate_id').exclude(plate_id=self.get_object().id)
-
-                if models.Plate.objects.filter(id__in=plate_list, active=True).exists():
-                    logger.warning(f"Attempt to activate plate with candidates already in active plates")
-                    raise exceptions.PlateUserIsActiveException
+        if request.data.get('active'):
+            plate_id = self.get_object().id
+            use_case = ActivatePlateUseCase(repository=PlateRepository())
+            use_case.execute(plate_id)
 
         return super().update(request, *args, **kwargs)
 
@@ -212,7 +232,11 @@ class PlateUserViewSet(ViewSetBase, ViewSetPermissions):
         param_serializer.is_valid(raise_exception=True)
         logger.info(
             f"Removing user {param_serializer.validated_data['candidate']} from plate {param_serializer.validated_data['plate']}")
-        actions.PlateUserAction.delete_user_plate(**param_serializer.validated_data)
+
+        use_case = DeleteUserPlateUseCase(candidate_repository=CandidateRepository(),
+                                          plate_user_repository=PlateUserRepository())
+        data = param_serializer.validated_data
+        use_case.execute(candidate_id=data['candidate'], plate_id=data['plate'])
         return Response(status=200)
 
 
@@ -244,7 +268,8 @@ class VotingPlateViewSet(ViewSetBase, ViewSetPermissions):
         param_serializer.is_valid(raise_exception=True)
         logger.info(
             f"Removing plate {param_serializer.validated_data['plate']} from voting {param_serializer.validated_data['voting']}")
-        actions.VotingPlateAction.delete_voting_plate(**param_serializer.validated_data)
+        use_case = DeleteVotingPlateUseCase(repository=VotingPlateRepository())
+        use_case.execute(**param_serializer.validated_data)
         return Response(status=200)
 
     @extend_schema(
@@ -257,8 +282,9 @@ class VotingPlateViewSet(ViewSetBase, ViewSetPermissions):
     )
     @action(detail=False, methods=['GET'])
     def check_associate(self, request, *args, **kwargs):
-        id_associate = request.query_params['associate']
-        result = actions.VotingPlateAction.check_plate_voting(id_associate)
+        id_associate = int(request.query_params['associate'])
+        use_case = CheckPlateAssociateUseCase(repository=VotingPlateRepository())
+        result = use_case.execute(id_associate)
         return Response(data={"data": result}, status=200)
 
 
@@ -289,14 +315,6 @@ class VotingUserViewSet(ViewSetBase, ViewSetPermissions):
         queryset = models.VotingUser.objects.ranking(voting_id=voting_id)
         return Response(data=queryset, status=status.HTTP_200_OK)
 
-    @extend_schema(
-        summary='Obter eleitores de uma chapa',
-        description='Retorna os eleitores que votaram em uma chapa específica.',
-        parameters=[
-            {'name': 'plate', 'in': 'query', 'required': True, 'schema': {'type': 'integer'}}
-        ],
-        responses={200: {'description': 'Lista de eleitores da chapa'}}
-    )
     @action(detail=False, methods=['GET'])
     def get_voter_plate(self, request):
         query_params_plate = request.query_params['plate']
@@ -311,93 +329,48 @@ class VotingUserViewSet(ViewSetBase, ViewSetPermissions):
         logger.info(f"Generating PDF report for voting event {params_serializers.initial_data['event_vote']}")
         behavior = behaviors.VotingUserBehavior(event_vote=params_serializers.initial_data['event_vote'])
         pdf_content = behavior.run()
-
-        response = HttpResponse(pdf_content, content_type='application/pdf', status=200)
-        response['Content-Disposition'] = 'inline; filename=resume.pdf'
-
+        response = HttpResponse(pdf_content, content_type='application/pdf')
+        response['Content-Disposition'] = 'inline; filename="voter_plate.pdf"'
         return response
 
     @action(detail=False, methods=['POST'])
     def resume_report(self, request, *args, **kwargs):
-        result_serializer = params_serializer.ResumeVotingSerializerParams(
-            data=request.data,
-            context={'request': request}
-        )
-        result_serializer.is_valid(raise_exception=True)
-        logger.info(f"Generating resume report for voting {result_serializer.validated_data['event_vote']}")
-        response = helpers.generate_report_to_download(
-            name="resume_vote",
-            params=result_serializer.validated_data
-        )
-        return response
+        serializer = params_serializer.ResumeVotingSerializerParams(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        event_vote = serializer.validated_data['event_vote']
 
-    @extend_schema(
-        summary='Relatório de eleitores por chapa (PDF)',
-        description='Gera um relatório PDF dos eleitores que votaram em uma chapa específica.',
-        request={
-            'application/json': {
-                'type': 'object',
-                'properties': {
-                    'event_vote': {'type': 'integer'},
-                    'plate': {'type': 'integer'}
-                },
-                'required': ['event_vote', 'plate']
-            }
-        },
-        responses={
-            200: {
-                'description': 'Relatório PDF gerado',
-                'content': {'application/pdf': {'schema': {'type': 'string', 'format': 'binary'}}}
-            }
-        }
-    )
+        logger.info(f"Generating resumido report for event {event_vote}")
+        use_case = GenerateGeneralVoteResultUseCase(report_repository=ReportRepository())
+        pdf_content = use_case.execute(event_vote_id=event_vote)
+
+        return HttpResponse(pdf_content, content_type='application/pdf')
+
     @action(detail=False, methods=['POST'])
-    def resume_report_plate_vote(self, request, *args, **kwargs):
-        result_serializer = params_serializer.VoterInPlateSerializerParams(
-            data=request.data,
-            context={'request': request}
-        )
-        result_serializer.is_valid(raise_exception=True)
-        logger.info(
-            f"Generating plate voter report for event {result_serializer.validated_data['event_vote']} and plate {result_serializer.validated_data['plate']}")
-        response = helpers.generate_report_to_plate_user_download(
-            name="resume_vote_voter_in_plate",
-            params=result_serializer.validated_data
-        )
-        return response
+    def resume_report_plate_vote(self, request):
+        serializer = params_serializer.VoterInPlateSerializerParams(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-    @extend_schema(
-        summary='Relatório PDF de eleitores por chapa',
-        description='Gera um relatório PDF simples dos eleitores de uma chapa.',
-        request={
-            'application/json': {
-                'type': 'object',
-                'properties': {
-                    'plate': {'type': 'integer'}
-                },
-                'required': ['plate']
-            }
-        },
-        responses={
-            200: {
-                'description': 'Relatório PDF gerado',
-                'content': {'application/pdf': {'schema': {'type': 'string', 'format': 'binary'}}}
-            }
-        }
-    )
-    @action(detail=False, methods=['POST'])
-    def get_voter_plate_pdf(self, request):
-        params_serializers = params_serializer.VoterPlateParamsSerializer(data=request.data)
-        params_serializers.is_valid(raise_exception=True)
+        event_vote = serializer.validated_data['event_vote']
+        plate = serializer.validated_data['plate']
 
-        logger.info(f"Generating voter plate PDF for plate {params_serializers.initial_data['plate']}")
-        behavior = behaviors.VoterInPlate(plate=params_serializers.initial_data['plate'])
+        logger.info(f"Generating plate vote report for event {event_vote} and plate {plate}")
+        behavior = VoteByPlateBehavior(event_vote=event_vote, plate=plate)
         pdf_content = behavior.run()
 
-        response = HttpResponse(pdf_content, content_type='application/pdf', status=200)
-        response['Content-Disposition'] = 'inline; filename=resume.pdf'
+        if pdf_content is None:
+            return Response({"detail": "Nenhum dado encontrado."}, status=404)
 
-        return response
+        return HttpResponse(pdf_content, content_type='application/pdf')
+
+    @action(detail=False, methods=['POST'])
+    def get_voter_plate_pdf(self, request):
+        serializer = params_serializer.VoterInPlateSerializerParams(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        plate = serializer.validated_data['plate']
+        logger.info(f"Generating plate vote report for plate {plate}")
+        behavior = behaviors.VoterInPlateResume(plate=plate)
+        pdf_content = behavior.run()
+        return HttpResponse(pdf_content, content_type='application/pdf')
 
 
 @extend_schema(tags=['Reports'])
@@ -437,15 +410,11 @@ class ResumeVoteViewSet(ViewSetBase, ViewSetPermissions):
         }
     )
     @action(detail=False, methods=['POST'])
-    def resume_report(self, request, *args, **kwargs):
-        result_serializer = params_serializer.ResumeVotingSerializerParams(
-            data=request.data,
-            context={'request': request}
-        )
-        result_serializer.is_valid(raise_exception=True)
-        logger.info(f"Generating resume report for voting {result_serializer.validated_data['event_vote']}")
-        response = helpers.generate_report_to_resume_download(
-            name="resume_vote",
-            params=result_serializer.validated_data
-        )
-        return response
+    def resume_report(self, request):
+        serializer = params_serializer.ResumeVotingSerializerParams(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        event_vote = serializer.validated_data['event_vote']
+        logger.info(f"Generating resumido report for event {event_vote}")
+        behavior = behaviors.ResumeVoterProvisory(event_vote=event_vote)
+        pdf_content = behavior.run()
+        return HttpResponse(pdf_content, content_type='application/pdf')

@@ -29,3 +29,7 @@ class MinioException(APIException):
 class InvalidCredentialsException(APIException):
     status_code = 405
     default_detail = messages.INVALID_CREDENTIALS
+
+
+class PlateUserIsActiveException(APIException):
+    pass
