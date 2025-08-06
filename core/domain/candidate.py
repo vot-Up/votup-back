@@ -1,5 +1,5 @@
 class Candidate:
-    def __init__(self, id: int, name: str, cellphone: str, disable: bool = False,avatar_url: str = None):
+    def __init__(self, id: int, name: str, cellphone: str, disable: bool = False, avatar_url: str = None):
         self.id = id
         self.name = name
         self.cellphone = cellphone

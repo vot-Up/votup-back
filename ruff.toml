@@ -1,0 +1,13 @@
+line-length = 120
+target-version = "py311"
+
+[lint]
+select = ["E", "F", "I", "N", "D", "UP", "B", "C90", "PL"]
+ignore = ["E501", "PLR2004", "D103", "D100", "PLC0415",
+    "D102", "D101", "D107", "D104", "D106", "PLR0912", "N801", "B904", "F811","PLR0913"]
+#N801 ajustar depois o lance das apiexceptions
+exclude = ["*/migrations/*"]
+
+[format]
+quote-style = "double"
+

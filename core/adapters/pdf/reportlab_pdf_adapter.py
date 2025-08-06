@@ -1,7 +1,8 @@
+from collections.abc import Callable
 from io import BytesIO
+
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
-from typing import Callable
 
 from core.ports.pdf.pdf_generator_port import PdfGeneratorPort
 

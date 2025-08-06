@@ -1,5 +1,3 @@
-from typing import List
-
 from account import exceptions
 
 
@@ -10,7 +8,7 @@ class Plate:
         self._was_voted = was_voted
         self._active = active
 
-    def activate(self, conflicting_plates: List[int]):
+    def activate(self, conflicting_plates: list[int]):
         if self.id in conflicting_plates:
             raise exceptions.PlateUserIsActiveException()
         self._active = True
@@ -18,4 +16,3 @@ class Plate:
     @property
     def is_active(self):
         return self._active
-

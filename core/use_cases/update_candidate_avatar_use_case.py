@@ -1,11 +1,11 @@
 from core.ports.candidate_repository_port import CandidateRepositoryPort
 from core.ports.file_storage_port import FileStoragePort
 
+
 class UpdateCandidateAvatarUseCase:
     def __init__(self, storage: FileStoragePort, repository: CandidateRepositoryPort):
         self.storage = storage
         self.repository = repository
-
 
     def execute(self, candidate_id: int, file: bytes, filename: str):
         candidate = self.repository.get_by_id(candidate_id)

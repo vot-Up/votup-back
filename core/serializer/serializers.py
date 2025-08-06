@@ -7,13 +7,13 @@ from core.models import models
 class VoterSerializer(account_serializers.SerializerBase):
     class Meta:
         model = models.Voter
-        fields = '__all__'
+        fields = "__all__"
 
 
 class CandidateSerializer(account_serializers.SerializerBase):
     class Meta:
         model = models.Candidate
-        fields = '__all__'
+        fields = "__all__"
 
 
 class PlateSerializer(account_serializers.SerializerBase):
@@ -21,12 +21,12 @@ class PlateSerializer(account_serializers.SerializerBase):
 
     class Meta:
         model = models.Plate
-        fields = '__all__'
+        fields = "__all__"
 
     expandable_fields = {
-        'plate': (
-            'core.serializer.PlateUserPresidentsOrViceSerializer',
-            {'fields': ['id', 'candidate', 'type'], "many": True}
+        "plate": (
+            "core.serializer.PlateUserPresidentsOrViceSerializer",
+            {"fields": ["id", "candidate", "type"], "many": True},
         ),
     }
 
@@ -36,19 +36,16 @@ class EventVotingSerializer(account_serializers.SerializerBase):
 
     class Meta:
         model = models.EventVoting
-        fields = '__all__'
+        fields = "__all__"
 
 
 class PlateUserSerializer(account_serializers.SerializerBase):
     class Meta:
         model = models.PlateUser
-        fields = '__all__'
+        fields = "__all__"
 
     expandable_fields = {
-        'candidate': (
-            'core.serializer.CandidateSerializer',
-            {'fields': ['id', 'name']}
-        ),
+        "candidate": ("core.serializer.CandidateSerializer", {"fields": ["id", "name"]}),
     }
 
 
@@ -58,44 +55,32 @@ class PlateUserPresidentsOrViceSerializer(account_serializers.SerializerBase):
 
     class Meta:
         model = models.PlateUser
-        fields = '__all__'
+        fields = "__all__"
 
 
 class VotingPlateSerializer(account_serializers.SerializerBase):
     class Meta:
         model = models.VotingPlate
-        fields = '__all__'
+        fields = "__all__"
 
     expandable_fields = {
-        'plate': (
-            'core.serializer.PlateSerializer',
-            {'fields': ['id', 'url', 'name', 'active', 'was_voted']}
-        ),
-        'voting': (
-            'core.serializer.EventVotingSerializer',
-            {'fields': ['id', 'url', 'description', 'date']}
-        )
+        "plate": ("core.serializer.PlateSerializer", {"fields": ["id", "url", "name", "active", "was_voted"]}),
+        "voting": ("core.serializer.EventVotingSerializer", {"fields": ["id", "url", "description", "date"]}),
     }
 
 
 class VotingUserSerializer(account_serializers.SerializerBase):
     class Meta:
         model = models.VotingUser
-        fields = '__all__'
+        fields = "__all__"
 
 
 class ResumeVoteSerializer(account_serializers.SerializerBase):
     class Meta:
         model = models.ResumeVote
-        fields = '__all__'
+        fields = "__all__"
 
     expandable_fields = {
-        'plate': (
-            'core.serializer.PlateSerializer',
-            {'fields': ['id', 'name']}
-        ),
-        'voting': (
-            'core.serializer.EventVotingSerializer',
-            {'fields': ['id', 'description']}
-        )
+        "plate": ("core.serializer.PlateSerializer", {"fields": ["id", "name"]}),
+        "voting": ("core.serializer.EventVotingSerializer", {"fields": ["id", "description"]}),
     }

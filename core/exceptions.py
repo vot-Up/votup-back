@@ -86,7 +86,6 @@ class TimeOverVotingException(APIException):
     default_detail = messages.TIME_OVER_VOTING
 
 
-
 class DeleteVoteActiveException(APIException):
     status_code = 400
     default_detail = messages.INVALID_DELETE_VOTE

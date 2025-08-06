@@ -1,6 +1,7 @@
 from io import BytesIO
-from reportlab.pdfgen import canvas
+
 from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
 
 
 class GenerateGeneralVoteResultPdfService:
@@ -19,7 +20,7 @@ class GenerateGeneralVoteResultPdfService:
         y -= 50
         p.setFont("Helvetica", 12)
 
-        for description, plate_name, vote_count in self.rows:
+        for _, plate_name, vote_count in self.rows:
             p.drawString(50, y, f"Chapa: {plate_name} - Votos: {vote_count}")
             y -= 20
             if y < 50:

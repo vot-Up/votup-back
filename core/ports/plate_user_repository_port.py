@@ -1,4 +1,4 @@
-from typing import Protocol, List, Any
+from typing import Protocol
 
 
 class PlateUserRepositoryPort(Protocol):

@@ -2,7 +2,7 @@ import datetime
 from io import BytesIO
 
 from django.db import connection
-from django.db.models import F, Subquery, OuterRef, Count
+from django.db.models import Count, F, OuterRef, Subquery
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 
@@ -11,7 +11,7 @@ from core.models import models
 
 class BaseBehavior:
     def run(self):
-        raise NotImplementedError('You must subclass and implement the trace rule validation')
+        raise NotImplementedError("You must subclass and implement the trace rule validation")
 
 
 class PDFWithFooter:
@@ -41,24 +41,24 @@ class VotingBehaviorPdfVoter(BaseBehavior):
         return models.EventVoting.objects.get(pk=self.header_text, active=True)
 
     def get_body(self):
-        queryset = models.VotingUser.objects.filter(
-            voter__active=True,
-            plate__active=True
-        ).annotate(
-            voting_name=F('voter__name'),
-            plate_name=F('plate__name'),
-            presidente=Subquery(
-                models.Candidate.objects.filter(
-                    id=Subquery(
-                        models.PlateUser.objects.filter(
-                            type='P',
-                            plate__voting_user_plate=OuterRef('pk')
-                        ).values('candidate')[:1]
-                    )
-                ).values('name')[:1]
+        queryset = (
+            models.VotingUser.objects.filter(voter__active=True, plate__active=True)
+            .annotate(
+                voting_name=F("voter__name"),
+                plate_name=F("plate__name"),
+                presidente=Subquery(
+                    models.Candidate.objects.filter(
+                        id=Subquery(
+                            models.PlateUser.objects.filter(type="P", plate__voting_user_plate=OuterRef("pk")).values(
+                                "candidate"
+                            )[:1]
+                        )
+                    ).values("name")[:1]
+                ),
             )
-        ).order_by()
-        return queryset.values('voting_name', 'plate_name', 'presidente')
+            .order_by()
+        )
+        return queryset.values("voting_name", "plate_name", "presidente")
 
     def run(self):
         pdf = PDFWithFooter()
@@ -84,7 +84,7 @@ class VoterInPlate(BaseBehavior):
         return models.Plate.objects.get(pk=self.plate)
 
     def get_body(self):
-        return models.Voter.objects.filter(votinguser__plate=self.plate).values('name')
+        return models.Voter.objects.filter(votinguser__plate=self.plate).values("name")
 
     def run(self):
         pdf = PDFWithFooter()
@@ -100,7 +100,7 @@ class VoterInPlate(BaseBehavior):
 
         c.setFont("Helvetica", 12)
         for item in self.get_body():
-            c.drawString(40, pdf.y, item['name'])
+            c.drawString(40, pdf.y, item["name"])
             pdf.y -= 20
 
         return pdf.save()
@@ -118,7 +118,7 @@ class ResumeVoterProvisory(BaseBehavior):
         return models.EventVoting.objects.get(pk=self.event_vote)
 
     def get_body(self):
-        return models.ResumeVote.objects.all().values('plate__name', 'quantity')
+        return models.ResumeVote.objects.all().values("plate__name", "quantity")
 
     def run(self):
         pdf = PDFWithFooter()
@@ -135,8 +135,8 @@ class ResumeVoterProvisory(BaseBehavior):
 
         c.setFont("Helvetica", 12)
         for item in self.get_body():
-            c.drawString(40, pdf.y, item['plate__name'])
-            c.drawString(300, pdf.y, str(item['quantity']))
+            c.drawString(40, pdf.y, item["plate__name"])
+            c.drawString(300, pdf.y, str(item["quantity"]))
             pdf.y -= 20
 
         return pdf.save()
@@ -150,9 +150,13 @@ class VotingUserBehavior(BaseBehavior):
         return models.EventVoting.objects.get(pk=self.event_vote)
 
     def get_body(self):
-        return models.VotingUser.objects.all().values('plate__id', 'plate__name').annotate(
-            total=Count('*')
-        ).filter(voting_id=self.get_header().id, voter__isnull=False).order_by('-total')
+        return (
+            models.VotingUser.objects.all()
+            .values("plate__id", "plate__name")
+            .annotate(total=Count("*"))
+            .filter(voting_id=self.get_header().id, voter__isnull=False)
+            .order_by("-total")
+        )
 
     def run(self):
         pdf = PDFWithFooter()
@@ -169,8 +173,8 @@ class VotingUserBehavior(BaseBehavior):
 
         c.setFont("Helvetica", 12)
         for item in self.get_body():
-            c.drawString(40, pdf.y, item['plate__name'])
-            c.drawString(300, pdf.y, str(item['total']))
+            c.drawString(40, pdf.y, item["plate__name"])
+            c.drawString(300, pdf.y, str(item["total"]))
             pdf.y -= 20
 
         return pdf.save()
@@ -183,7 +187,8 @@ class VoteByPlateBehavior(BaseBehavior):
 
     def _get_data(self):
         with connection.cursor() as cursor:
-            cursor.execute("""
+            cursor.execute(
+                """
                            SELECT ev.description,
                                   p.name,
                                   v2.name              AS eleitor,
@@ -203,7 +208,9 @@ class VoteByPlateBehavior(BaseBehavior):
                            WHERE ev.id = %s
                              AND p.id = %s
                            ORDER BY eleitor DESC
-                           """, [self.event_vote, self.plate])
+                           """,
+                [self.event_vote, self.plate],
+            )
             return cursor.fetchall()
 
     def run(self):
@@ -268,7 +275,8 @@ class GeneralVoteResultBehavior(BaseBehavior):
 
     def _fetch_data(self):
         with connection.cursor() as cursor:
-            cursor.execute("""
+            cursor.execute(
+                """
                            SELECT ev.description, p.name, COUNT(*)
                            FROM voting_user v
                                     INNER JOIN event_voting ev ON ev.id = v.id_voting
@@ -276,7 +284,9 @@ class GeneralVoteResultBehavior(BaseBehavior):
                            WHERE ev.id = %s
                            GROUP BY ev.description, p.name
                            ORDER BY p.name DESC
-                           """, [self.event_vote_id])
+                           """,
+                [self.event_vote_id],
+            )
             return cursor.fetchall()
 
     def run(self):
@@ -293,7 +303,7 @@ class GeneralVoteResultBehavior(BaseBehavior):
         y -= 50
         p.setFont("Helvetica", 12)
 
-        for description, plate_name, vote_count in rows:
+        for _, plate_name, vote_count in rows:
             p.drawString(50, y, f"Chapa: {plate_name} - Votos: {vote_count}")
             y -= 20
             if y < 50:

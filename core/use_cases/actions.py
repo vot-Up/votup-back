@@ -41,7 +41,6 @@ class EventVotingAction:
 class VotingUserAction:
     @staticmethod
     def get_voting_user(cellphone: str):
-
         try:
             voter = models.Voter.objects.get(cellphone=cellphone)
         except Exception:
@@ -60,9 +59,9 @@ class VotingUserAction:
                 raise exceptions.UserHasAlreadyVotedException()
 
             return {
-                'id': voting_user.id,
-                'voting': voting_user.voting.id,
-                'voter': voting_user.voter.id,
+                "id": voting_user.id,
+                "voting": voting_user.voting.id,
+                "voter": voting_user.voter.id,
             }
         else:
             raise exceptions.NoActiveVotingException()
@@ -74,7 +73,6 @@ class VotingUserAction:
 
 
 class VotingAction:
-
     @staticmethod
     def active_vote(vote_id: int):
         if models.EventVoting.objects.filter(active=True).count() > 0:
@@ -99,8 +97,6 @@ class VotingAction:
     @staticmethod
     def get_pdf_user():
         return None
-
-
 
 
 class ResumeVoteAction:

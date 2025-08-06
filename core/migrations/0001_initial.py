@@ -9,150 +9,218 @@ import core.models.models
 class Migration(migrations.Migration):
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.RunSQL("CREATE EXTENSION IF NOT EXISTS unaccent;"),
         migrations.CreateModel(
-            name='Candidate',
+            name="Candidate",
             fields=[
-                ('id', models.BigAutoField(primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, null=True)),
-                ('modified_at', models.DateTimeField(auto_now=True, null=True)),
-                ('active', models.BooleanField(default=True, null=True)),
-                ('name', models.CharField(max_length=256, null=True)),
-                ('cellphone', models.CharField(
-                    error_messages={'unique': 'Esse numéro de celular já está sendo usado por outro usuário!'},
-                    max_length=64, null=True, unique=True)),
-                ('avatar', models.ImageField(null=True, upload_to=core.models.models.upload_to)),
-                ('disabled', models.BooleanField(db_column='disabled', default=False)),
+                ("id", models.BigAutoField(primary_key=True, serialize=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True, null=True)),
+                ("modified_at", models.DateTimeField(auto_now=True, null=True)),
+                ("active", models.BooleanField(default=True, null=True)),
+                ("name", models.CharField(max_length=256, null=True)),
+                (
+                    "cellphone",
+                    models.CharField(
+                        error_messages={"unique": "Esse numéro de celular já está sendo usado por outro usuário!"},
+                        max_length=64,
+                        null=True,
+                        unique=True,
+                    ),
+                ),
+                ("avatar", models.ImageField(null=True, upload_to=core.models.models.upload_to)),
+                ("disabled", models.BooleanField(db_column="disabled", default=False)),
             ],
             options={
-                'db_table': 'candidate',
+                "db_table": "candidate",
             },
         ),
         migrations.CreateModel(
-            name='EventVoting',
+            name="EventVoting",
             fields=[
-                ('id', models.BigAutoField(primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, null=True)),
-                ('modified_at', models.DateTimeField(auto_now=True, null=True)),
-                ('active', models.BooleanField(default=True, null=True)),
-                ('date', models.DateTimeField(null=True, verbose_name='Date')),
-                ('description',
-                 models.CharField(error_messages={'unique': 'Já existe uma votação cadastrada com o mesmo nome!'},
-                                  max_length=54, unique=True, verbose_name='Description')),
+                ("id", models.BigAutoField(primary_key=True, serialize=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True, null=True)),
+                ("modified_at", models.DateTimeField(auto_now=True, null=True)),
+                ("active", models.BooleanField(default=True, null=True)),
+                ("date", models.DateTimeField(null=True, verbose_name="Date")),
+                (
+                    "description",
+                    models.CharField(
+                        error_messages={"unique": "Já existe uma votação cadastrada com o mesmo nome!"},
+                        max_length=54,
+                        unique=True,
+                        verbose_name="Description",
+                    ),
+                ),
             ],
             options={
-                'db_table': 'event_voting',
+                "db_table": "event_voting",
             },
         ),
         migrations.CreateModel(
-            name='Plate',
+            name="Plate",
             fields=[
-                ('id', models.BigAutoField(primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, null=True)),
-                ('modified_at', models.DateTimeField(auto_now=True, null=True)),
-                ('active', models.BooleanField(default=True, null=True)),
-                ('name', models.CharField(error_messages={'unique': 'Já existe uma chapa cadastrada com o mesmo nome!'},
-                                          max_length=54, unique=True)),
+                ("id", models.BigAutoField(primary_key=True, serialize=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True, null=True)),
+                ("modified_at", models.DateTimeField(auto_now=True, null=True)),
+                ("active", models.BooleanField(default=True, null=True)),
+                (
+                    "name",
+                    models.CharField(
+                        error_messages={"unique": "Já existe uma chapa cadastrada com o mesmo nome!"},
+                        max_length=54,
+                        unique=True,
+                    ),
+                ),
             ],
             options={
-                'db_table': 'plate',
+                "db_table": "plate",
             },
         ),
         migrations.CreateModel(
-            name='Voter',
+            name="Voter",
             fields=[
-                ('id', models.BigAutoField(primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, null=True)),
-                ('modified_at', models.DateTimeField(auto_now=True, null=True)),
-                ('active', models.BooleanField(default=True, null=True)),
-                ('name', models.CharField(max_length=256, null=True)),
-                ('cellphone', models.CharField(
-                    error_messages={'unique': 'Esse numéro de celular já está sendo usado por outro usuário!'},
-                    max_length=64, null=True, unique=True)),
-                ('avatar', models.ImageField(null=True, upload_to=core.models.models.upload_to)),
+                ("id", models.BigAutoField(primary_key=True, serialize=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True, null=True)),
+                ("modified_at", models.DateTimeField(auto_now=True, null=True)),
+                ("active", models.BooleanField(default=True, null=True)),
+                ("name", models.CharField(max_length=256, null=True)),
+                (
+                    "cellphone",
+                    models.CharField(
+                        error_messages={"unique": "Esse numéro de celular já está sendo usado por outro usuário!"},
+                        max_length=64,
+                        null=True,
+                        unique=True,
+                    ),
+                ),
+                ("avatar", models.ImageField(null=True, upload_to=core.models.models.upload_to)),
             ],
             options={
-                'db_table': 'voter',
+                "db_table": "voter",
             },
         ),
         migrations.CreateModel(
-            name='ResumeVote',
+            name="ResumeVote",
             fields=[
-                ('id', models.BigAutoField(primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, null=True)),
-                ('modified_at', models.DateTimeField(auto_now=True, null=True)),
-                ('active', models.BooleanField(default=True, null=True)),
-                ('quantity', models.IntegerField(blank=True, db_column='quantity_vote', default=0, null=True)),
-                ('plate',
-                 models.ForeignKey(db_column='id_plate', null=True, on_delete=django.db.models.deletion.DO_NOTHING,
-                                   to='core.plate')),
-                ('voting',
-                 models.ForeignKey(db_column='id_voting', null=True, on_delete=django.db.models.deletion.DO_NOTHING,
-                                   to='core.eventvoting')),
+                ("id", models.BigAutoField(primary_key=True, serialize=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True, null=True)),
+                ("modified_at", models.DateTimeField(auto_now=True, null=True)),
+                ("active", models.BooleanField(default=True, null=True)),
+                ("quantity", models.IntegerField(blank=True, db_column="quantity_vote", default=0, null=True)),
+                (
+                    "plate",
+                    models.ForeignKey(
+                        db_column="id_plate", null=True, on_delete=django.db.models.deletion.DO_NOTHING, to="core.plate"
+                    ),
+                ),
+                (
+                    "voting",
+                    models.ForeignKey(
+                        db_column="id_voting",
+                        null=True,
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        to="core.eventvoting",
+                    ),
+                ),
             ],
             options={
-                'db_table': 'resume_vote',
+                "db_table": "resume_vote",
             },
         ),
         migrations.CreateModel(
-            name='PlateUser',
+            name="PlateUser",
             fields=[
-                ('id', models.BigAutoField(primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, null=True)),
-                ('modified_at', models.DateTimeField(auto_now=True, null=True)),
-                ('active', models.BooleanField(default=True, null=True)),
-                ('type', models.CharField(db_column='type', max_length=1, null=True)),
-                ('candidate',
-                 models.ForeignKey(db_column='id_candidate', null=True, on_delete=django.db.models.deletion.DO_NOTHING,
-                                   related_name='candidate', to='core.candidate')),
-                ('plate', models.ForeignKey(db_column='id_plate', on_delete=django.db.models.deletion.CASCADE,
-                                            related_name='plate', to='core.plate')),
+                ("id", models.BigAutoField(primary_key=True, serialize=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True, null=True)),
+                ("modified_at", models.DateTimeField(auto_now=True, null=True)),
+                ("active", models.BooleanField(default=True, null=True)),
+                ("type", models.CharField(db_column="type", max_length=1, null=True)),
+                (
+                    "candidate",
+                    models.ForeignKey(
+                        db_column="id_candidate",
+                        null=True,
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        related_name="candidate",
+                        to="core.candidate",
+                    ),
+                ),
+                (
+                    "plate",
+                    models.ForeignKey(
+                        db_column="id_plate",
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="plate",
+                        to="core.plate",
+                    ),
+                ),
             ],
             options={
-                'db_table': 'plate_user',
-                'unique_together': {('plate', 'type')},
+                "db_table": "plate_user",
+                "unique_together": {("plate", "type")},
             },
         ),
         migrations.CreateModel(
-            name='VotingPlate',
+            name="VotingPlate",
             fields=[
-                ('id', models.BigAutoField(primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, null=True)),
-                ('modified_at', models.DateTimeField(auto_now=True, null=True)),
-                ('active', models.BooleanField(default=True, null=True)),
-                ('plate', models.ForeignKey(db_column='id_plate', on_delete=django.db.models.deletion.DO_NOTHING,
-                                            to='core.plate')),
-                ('voting', models.ForeignKey(db_column='id_voting', on_delete=django.db.models.deletion.DO_NOTHING,
-                                             to='core.eventvoting')),
+                ("id", models.BigAutoField(primary_key=True, serialize=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True, null=True)),
+                ("modified_at", models.DateTimeField(auto_now=True, null=True)),
+                ("active", models.BooleanField(default=True, null=True)),
+                (
+                    "plate",
+                    models.ForeignKey(
+                        db_column="id_plate", on_delete=django.db.models.deletion.DO_NOTHING, to="core.plate"
+                    ),
+                ),
+                (
+                    "voting",
+                    models.ForeignKey(
+                        db_column="id_voting", on_delete=django.db.models.deletion.DO_NOTHING, to="core.eventvoting"
+                    ),
+                ),
             ],
             options={
-                'db_table': 'voting_plate',
-                'unique_together': {('voting', 'plate')},
+                "db_table": "voting_plate",
+                "unique_together": {("voting", "plate")},
             },
         ),
         migrations.CreateModel(
-            name='VotingUser',
+            name="VotingUser",
             fields=[
-                ('id', models.BigAutoField(primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, null=True)),
-                ('modified_at', models.DateTimeField(auto_now=True, null=True)),
-                ('active', models.BooleanField(default=True, null=True)),
-                ('plate',
-                 models.ForeignKey(db_column='id_plate', null=True, on_delete=django.db.models.deletion.DO_NOTHING,
-                                   related_name='voting_user_plate', to='core.plate')),
-                ('voter',
-                 models.ForeignKey(db_column='id_voter', null=True, on_delete=django.db.models.deletion.DO_NOTHING,
-                                   to='core.voter')),
-                ('voting', models.ForeignKey(db_column='id_voting', on_delete=django.db.models.deletion.DO_NOTHING,
-                                             to='core.eventvoting')),
+                ("id", models.BigAutoField(primary_key=True, serialize=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True, null=True)),
+                ("modified_at", models.DateTimeField(auto_now=True, null=True)),
+                ("active", models.BooleanField(default=True, null=True)),
+                (
+                    "plate",
+                    models.ForeignKey(
+                        db_column="id_plate",
+                        null=True,
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        related_name="voting_user_plate",
+                        to="core.plate",
+                    ),
+                ),
+                (
+                    "voter",
+                    models.ForeignKey(
+                        db_column="id_voter", null=True, on_delete=django.db.models.deletion.DO_NOTHING, to="core.voter"
+                    ),
+                ),
+                (
+                    "voting",
+                    models.ForeignKey(
+                        db_column="id_voting", on_delete=django.db.models.deletion.DO_NOTHING, to="core.eventvoting"
+                    ),
+                ),
             ],
             options={
-                'db_table': 'voting_user',
-                'unique_together': {('voter', 'voting')},
+                "db_table": "voting_user",
+                "unique_together": {("voter", "voting")},
             },
         ),
     ]

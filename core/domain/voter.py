@@ -1,4 +1,3 @@
-
 class Voter:
     def __init__(self, id: int, name: str, cellphone: str, has_voted: bool):
         self.id = id

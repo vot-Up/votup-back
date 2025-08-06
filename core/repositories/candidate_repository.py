@@ -11,12 +11,10 @@ class CandidateRepository(CandidateRepositoryPort):
             name=candidate_obj.name,
             cellphone=candidate_obj.cellphone,
             disable=candidate_obj.disabled,
-            avatar_url=candidate_obj.avatar_url
+            avatar_url=candidate_obj.avatar_url,
         )
 
     def save(self, candidate: Candidate):
-        models.Candidate.objects.filter(
-            id=candidate.id
-        ).update(
-            disabled=candidate.disable,
-            avatar_url=candidate.avatar_url)
+        models.Candidate.objects.filter(id=candidate.id).update(
+            disabled=candidate.disable, avatar_url=candidate.avatar_url
+        )
