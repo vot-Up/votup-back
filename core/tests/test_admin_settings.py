@@ -73,3 +73,25 @@ class TestUnfoldSettings:
     def test_history_request_middleware_in_middleware(self):
         """HistoryRequestMiddleware is in MIDDLEWARE for simple-history user tracking."""
         assert "simple_history.middleware.HistoryRequestMiddleware" in settings.MIDDLEWARE
+
+
+class TestStorageSettings:
+    """Verify S3/Minio storage configuration uses STORAGES dict (Django 5.2+)."""
+
+    def test_storages_dict_exists(self):
+        """STORAGES dict is defined in settings."""
+        assert hasattr(settings, "STORAGES")
+        assert "default" in settings.STORAGES
+        assert "staticfiles" in settings.STORAGES
+
+    def test_default_storage_is_s3boto3(self):
+        """STORAGES['default'] uses S3Boto3Storage backend."""
+        backend = settings.STORAGES["default"]["BACKEND"]
+        assert backend == "storages.backends.s3boto3.S3Boto3Storage"
+
+    def test_aws_credentials_configured(self):
+        """AWS S3 credentials are set from environment."""
+        assert settings.AWS_ACCESS_KEY_ID is not None
+        assert settings.AWS_SECRET_ACCESS_KEY is not None
+        assert settings.AWS_STORAGE_BUCKET_NAME is not None
+        assert settings.AWS_S3_ENDPOINT_URL is not None

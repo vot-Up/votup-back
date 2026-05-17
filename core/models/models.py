@@ -15,7 +15,7 @@ def generate_filename(instance, filename):
 
 
 def upload_to(instance, filename):
-    return f"media/{generate_filename(instance, filename)}"
+    return generate_filename(instance, filename)
 
 
 class Voter(account_models.ModelBase):
