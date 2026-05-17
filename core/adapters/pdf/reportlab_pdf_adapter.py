@@ -4,10 +4,8 @@ from io import BytesIO
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 
-from core.ports.pdf.pdf_generator_port import PdfGeneratorPort
 
-
-class ReportlabPdfAdapter(PdfGeneratorPort):
+class ReportlabPdfAdapter:
     def __init__(self):
         self.buffer = None
         self.canvas = None
