@@ -85,9 +85,9 @@ class TestStorageSettings:
         assert "staticfiles" in settings.STORAGES
 
     def test_default_storage_is_s3boto3(self):
-        """STORAGES['default'] uses S3Boto3Storage backend."""
+        """STORAGES['default'] uses PrivateMediaStorage backend (subclass of S3Boto3Storage)."""
         backend = settings.STORAGES["default"]["BACKEND"]
-        assert backend == "storages.backends.s3boto3.S3Boto3Storage"
+        assert backend == "core.storage.PrivateMediaStorage"
 
     def test_aws_credentials_configured(self):
         """AWS S3 credentials are set from environment."""
