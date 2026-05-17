@@ -44,7 +44,7 @@ class Candidate(account_models.ModelBase):
         unique=True,
         error_messages={"unique": messages.CELLPHONE_ALREADY_EXISTS},
     )
-    avatar_url = models.CharField(max_length=512, null=True, blank=True)
+    avatar = models.ImageField(upload_to=upload_to, null=True, blank=True)
     disabled = models.BooleanField(default=False, db_column="disabled")
     history = HistoricalRecords()
 

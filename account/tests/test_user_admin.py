@@ -30,7 +30,7 @@ class TestUserAdminUnfoldConfig:
 
 class TestUserAdminListConfig:
     def test_list_display(self):
-        assert UserAdmin.list_display == ("email", "name", "cellphone", "is_staff", "is_active", "created_at")
+        assert UserAdmin.list_display == ("avatar_thumbnail", "email", "name", "cellphone", "is_staff", "is_active", "created_at")
 
     def test_search_fields(self):
         assert UserAdmin.search_fields == ("email", "name", "cellphone")

@@ -42,7 +42,7 @@ class TestUnfoldAdminConfig:
 
 class TestVoterAdminConfig:
     def test_list_display(self):
-        assert VoterAdmin.list_display == ("name", "cellphone", "active", "created_at")
+        assert VoterAdmin.list_display == ("name", "cellphone", "avatar_thumbnail", "active", "created_at")
 
     def test_search_fields(self):
         assert VoterAdmin.search_fields == ("name", "cellphone")
@@ -53,7 +53,7 @@ class TestVoterAdminConfig:
 
 class TestCandidateAdminConfig:
     def test_list_display(self):
-        assert CandidateAdmin.list_display == ("name", "cellphone", "disabled", "active", "created_at")
+        assert CandidateAdmin.list_display == ("name", "cellphone", "avatar_thumbnail", "disabled", "active", "created_at")
 
     def test_search_fields(self):
         assert CandidateAdmin.search_fields == ("name", "cellphone")

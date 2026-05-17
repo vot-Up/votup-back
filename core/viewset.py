@@ -124,7 +124,7 @@ class CandidateViewSet(ViewSetBase, ViewSetPermissions):
         file = request.FILES.get("avatar")
         if not file:
             return Response({"detail": "Arquivo de imagem ausente."}, status=400)
-        update_avatar(candidate_id=pk, file=file.read(), filename=file.name)
+        update_avatar(candidate_id=pk, file_content=file.read(), filename=file.name)
         return Response(status=204)
 
 
