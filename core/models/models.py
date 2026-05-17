@@ -21,10 +21,16 @@ def upload_to(instance, filename):
 class Voter(account_models.ModelBase):
     name = models.CharField(null=True, max_length=256)
     cellphone = models.CharField(
-        null=True, max_length=64, unique=True, error_messages={"unique": messages.CELLPHONE_ALREADY_EXISTS}
+        null=True,
+        max_length=64,
+        unique=True,
+        error_messages={"unique": messages.CELLPHONE_ALREADY_EXISTS},
     )
     avatar = models.ImageField(upload_to=upload_to, null=True)
     history = HistoricalRecords()
+
+    def __str__(self):
+        return self.name or str(self.id)
 
     class Meta:
         db_table = "voter"
@@ -33,12 +39,17 @@ class Voter(account_models.ModelBase):
 class Candidate(account_models.ModelBase):
     name = models.CharField(null=True, max_length=256)
     cellphone = models.CharField(
-        null=True, max_length=64, unique=True, error_messages={"unique": messages.CELLPHONE_ALREADY_EXISTS}
+        null=True,
+        max_length=64,
+        unique=True,
+        error_messages={"unique": messages.CELLPHONE_ALREADY_EXISTS},
     )
     avatar_url = models.CharField(max_length=512, null=True, blank=True)
-
     disabled = models.BooleanField(default=False, db_column="disabled")
     history = HistoricalRecords()
+
+    def __str__(self):
+        return self.name or str(self.id)
 
     class Meta:
         db_table = "candidate"
@@ -46,9 +57,15 @@ class Candidate(account_models.ModelBase):
 
 class Plate(account_models.ModelBase):
     name = models.CharField(
-        null=False, unique=True, max_length=54, error_messages={"unique": messages.PLATE_ALREADY_EXISTS}
+        null=False,
+        unique=True,
+        max_length=54,
+        error_messages={"unique": messages.PLATE_ALREADY_EXISTS},
     )
     history = HistoricalRecords()
+
+    def __str__(self):
+        return self.name or str(self.id)
 
     @property
     def was_voted(self):
@@ -60,10 +77,18 @@ class Plate(account_models.ModelBase):
 
 class PlateUser(account_models.ModelBase):
     candidate = models.ForeignKey(
-        to=Candidate, on_delete=models.DO_NOTHING, db_column="id_candidate", related_name="candidate", null=True
+        to=Candidate,
+        on_delete=models.DO_NOTHING,
+        db_column="id_candidate",
+        related_name="candidate",
+        null=True,
     )
     plate = models.ForeignKey(
-        to=Plate, on_delete=models.CASCADE, db_column="id_plate", related_name="plate", null=False
+        to=Plate,
+        on_delete=models.CASCADE,
+        db_column="id_plate",
+        related_name="plate",
+        null=False,
     )
     type = models.CharField(
         db_column="type",
@@ -72,6 +97,9 @@ class PlateUser(account_models.ModelBase):
     )
     history = HistoricalRecords()
 
+    def __str__(self):
+        return f"{self.plate} — {self.candidate} ({self.type})"
+
     class Meta:
         db_table = "plate_user"
         unique_together = [("plate", "type")]
@@ -79,7 +107,6 @@ class PlateUser(account_models.ModelBase):
 
 class EventVoting(account_models.ModelBase):
     date = models.DateTimeField(null=True, verbose_name=("Date"))
-
     description = models.CharField(
         null=False,
         blank=False,
@@ -89,6 +116,9 @@ class EventVoting(account_models.ModelBase):
         error_messages={"unique": messages.VOTING_ALREADY_EXISTS},
     )
     history = HistoricalRecords()
+
+    def __str__(self):
+        return self.description or str(self.id)
 
     @property
     def was_voted(self):
@@ -100,9 +130,11 @@ class EventVoting(account_models.ModelBase):
 
 class VotingPlate(account_models.ModelBase):
     plate = models.ForeignKey(to=Plate, on_delete=models.DO_NOTHING, db_column="id_plate", null=False)
-
     voting = models.ForeignKey(to=EventVoting, on_delete=models.DO_NOTHING, db_column="id_voting", null=False)
     history = HistoricalRecords()
+
+    def __str__(self):
+        return f"{self.voting} — {self.plate}"
 
     class Meta:
         db_table = "voting_plate"
@@ -111,20 +143,24 @@ class VotingPlate(account_models.ModelBase):
 
 class VotingUser(account_models.ModelBase):
     voting = models.ForeignKey(to=EventVoting, on_delete=models.DO_NOTHING, db_column="id_voting", null=False)
-
     voter = models.ForeignKey(
         to=Voter,
         on_delete=models.DO_NOTHING,
         db_column="id_voter",
         null=True,
     )
-
     plate = models.ForeignKey(
-        to=Plate, on_delete=models.DO_NOTHING, db_column="id_plate", related_name="voting_user_plate", null=True
+        to=Plate,
+        on_delete=models.DO_NOTHING,
+        db_column="id_plate",
+        related_name="voting_user_plate",
+        null=True,
     )
     history = HistoricalRecords()
-
     objects = managers.VotingUserManager()
+
+    def __str__(self):
+        return f"{self.voter} — {self.voting}"
 
     class Meta:
         db_table = "voting_user"
@@ -136,6 +172,9 @@ class ResumeVote(account_models.ModelBase):
     plate = models.ForeignKey(to=Plate, on_delete=models.DO_NOTHING, db_column="id_plate", null=True)
     quantity = models.IntegerField(null=True, db_column="quantity_vote", default=0, blank=True)
     history = HistoricalRecords()
+
+    def __str__(self):
+        return f"{self.voting} — {self.plate}: {self.quantity}"
 
     class Meta:
         db_table = "resume_vote"
