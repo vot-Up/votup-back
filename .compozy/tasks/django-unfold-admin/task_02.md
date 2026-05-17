@@ -1,5 +1,5 @@
 ---
-status: pending
+status: completed
 title: Remove reversion from viewset and add simple-history to models
 type: refactor
 complexity: medium
@@ -33,12 +33,12 @@ Remove django-reversion usage from `core/viewset.py` (ViewSetBase uses `revision
 </requirements>
 
 ## Subtasks
-- [ ] 2.1 Remove reversion import and context manager usage from core/viewset.py (keep transaction.atomic and logger)
-- [ ] 2.2 Add HistoricalRecords to all 8 business models in core/models/models.py
-- [ ] 2.3 Add HistoricalRecords to User model in account/models.py
-- [ ] 2.4 Run `manage.py makemigrations` to create history table migrations
-- [ ] 2.5 Run `manage.py migrate` to apply migrations
-- [ ] 2.6 Run all existing tests to confirm no regressions
+- [x] 2.1 Remove reversion import and context manager usage from core/viewset.py (keep transaction.atomic and logger)
+- [x] 2.2 Add HistoricalRecords to all 8 business models in core/models/models.py
+- [x] 2.3 Add HistoricalRecords to User model in account/models.py
+- [x] 2.4 Run `manage.py makemigrations` to create history table migrations
+- [x] 2.5 Run `manage.py migrate` to apply migrations
+- [x] 2.6 Run all existing tests to confirm no regressions
 
 ## Implementation Details
 See TechSpec "Data Models" section for HistoricalRecords addition. The key insight is that simple-history tracks changes automatically at the model level via signals — no manual `create_revision()` calls needed in the viewset. The ViewSetBase.create() and update() methods should simplify to just `with transaction.atomic():` + `logger.info()` + `super()` call. ModelBase (abstract base in account/models.py) should NOT get HistoricalRecords — each concrete model gets its own.
@@ -67,14 +67,14 @@ See TechSpec "Data Models" section for HistoricalRecords addition. The key insig
 
 ## Tests
 - Unit tests:
-  - [ ] ViewSetBase.create() still wraps in transaction.atomic() (verify no reversion context)
-  - [ ] ViewSetBase.update() still wraps in transaction.atomic() (verify no reversion context)
-  - [ ] Each model has a `history` attribute (HistoricalRecords)
-  - [ ] Creating a model instance via ORM creates a historical record
+  - [x] ViewSetBase.create() still wraps in transaction.atomic() (verify no reversion context)
+  - [x] ViewSetBase.update() still wraps in transaction.atomic() (verify no reversion context)
+  - [x] Each model has a `history` attribute (HistoricalRecords)
+  - [x] Creating a model instance via ORM creates a historical record
 - Integration tests:
-  - [ ] `manage.py makemigrations --check` shows no pending migrations
-  - [ ] `manage.py migrate` runs without errors
-  - [ ] All 36 existing tests pass
+  - [x] `manage.py makemigrations --check` shows no pending migrations
+  - [x] `manage.py migrate` runs without errors
+  - [x] All 47 existing tests pass (36 original + 11 from task_01; 18 new added here)
 - Test coverage target: >=80%
 
 ## Success Criteria

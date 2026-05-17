@@ -3,6 +3,7 @@ from datetime import datetime
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
+from simple_history.models import HistoricalRecords
 
 from account import managers, messages
 
@@ -46,6 +47,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         null=True,
     )
     is_active = models.BooleanField(null=False, default=True)
+    history = HistoricalRecords()
 
     objects = managers.UserManager()
 

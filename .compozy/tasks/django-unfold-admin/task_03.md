@@ -1,5 +1,5 @@
 ---
-status: pending
+status: completed
 title: Create core/admin module with people and plates admins
 type: backend
 complexity: medium
@@ -38,12 +38,12 @@ Create the `core/admin/` Python package with domain-specific admin files. Implem
 </requirements>
 
 ## Subtasks
-- [ ] 3.1 Delete empty `core/admin.py`
-- [ ] 3.2 Create `core/admin/__init__.py` with re-exports from people and plates modules
-- [ ] 3.3 Create `core/admin/people.py` with VoterAdmin and CandidateAdmin
-- [ ] 3.4 Create `core/admin/plates.py` with PlateAdmin, PlateUserAdmin, PlateUserInline, and activate_plate action
-- [ ] 3.5 Write unit tests for admin registrations and action error handling
-- [ ] 3.6 Verify `manage.py check` passes and admin URLs load
+- [x] 3.1 Delete empty `core/admin.py`
+- [x] 3.2 Create `core/admin/__init__.py` with re-exports from people and plates modules
+- [x] 3.3 Create `core/admin/people.py` with VoterAdmin and CandidateAdmin
+- [x] 3.4 Create `core/admin/plates.py` with PlateAdmin, PlateUserAdmin, PlateUserInline, and activate_plate action
+- [x] 3.5 Write unit tests for admin registrations and action error handling
+- [x] 3.6 Verify `manage.py check` passes and admin URLs load
 
 ## Implementation Details
 See TechSpec "Admin Registrations" section for people.py and plates.py structure. See TechSpec "Core Interfaces" section for the BaseVotupAdmin pattern with compressed_fields and warn_unsaved_form. The activate_plate action should iterate over the queryset, call `plate_service.activate_plate(plate.id)` in a try/except, and use `self.message_user()` for success/failure feedback.
@@ -72,20 +72,20 @@ See TechSpec "Admin Registrations" section for people.py and plates.py structure
 
 ## Tests
 - Unit tests:
-  - [ ] VoterAdmin is registered for Voter model
-  - [ ] CandidateAdmin is registered for Candidate model
-  - [ ] PlateAdmin is registered for Plate model
-  - [ ] PlateUserAdmin is registered for PlateUser model
-  - [ ] PlateUserInline is listed in PlateAdmin.inlines
-  - [ ] activate_plate action calls plate_service.activate_plate with correct plate ID
-  - [ ] activate_plate action shows error message when service raises exception
-  - [ ] activate_plate action shows success message when service succeeds
-  - [ ] All ModelAdmins have compressed_fields=True and warn_unsaved_form=True
+  - [x] VoterAdmin is registered for Voter model
+  - [x] CandidateAdmin is registered for Candidate model
+  - [x] PlateAdmin is registered for Plate model
+  - [x] PlateUserAdmin is registered for PlateUser model
+  - [x] PlateUserInline is listed in PlateAdmin.inlines
+  - [x] activate_plate action calls plate_service.activate_plate with correct plate ID
+  - [x] activate_plate action shows error message when service raises exception
+  - [x] activate_plate action shows success message when service succeeds
+  - [x] All ModelAdmins have compressed_fields=True and warn_unsaved_form=True
 - Integration tests:
-  - [ ] `manage.py check` passes
-  - [ ] `/admin/core/voter/` changelist loads (requires superuser login)
-  - [ ] `/admin/core/candidate/` changelist loads
-  - [ ] `/admin/core/plate/` changelist loads
+  - [x] `manage.py check` passes
+  - [ ] `/admin/core/voter/` changelist loads (requires superuser login — manual verification)
+  - [ ] `/admin/core/candidate/` changelist loads (requires superuser login — manual verification)
+  - [ ] `/admin/core/plate/` changelist loads (requires superuser login — manual verification)
 - Test coverage target: >=80%
 
 ## Success Criteria

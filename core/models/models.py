@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.db import models
+from simple_history.models import HistoricalRecords
 
 from account import models as account_models
 from core import managers, messages
@@ -23,6 +24,7 @@ class Voter(account_models.ModelBase):
         null=True, max_length=64, unique=True, error_messages={"unique": messages.CELLPHONE_ALREADY_EXISTS}
     )
     avatar = models.ImageField(upload_to=upload_to, null=True)
+    history = HistoricalRecords()
 
     class Meta:
         db_table = "voter"
@@ -36,6 +38,7 @@ class Candidate(account_models.ModelBase):
     avatar_url = models.CharField(max_length=512, null=True, blank=True)
 
     disabled = models.BooleanField(default=False, db_column="disabled")
+    history = HistoricalRecords()
 
     class Meta:
         db_table = "candidate"
@@ -45,6 +48,7 @@ class Plate(account_models.ModelBase):
     name = models.CharField(
         null=False, unique=True, max_length=54, error_messages={"unique": messages.PLATE_ALREADY_EXISTS}
     )
+    history = HistoricalRecords()
 
     @property
     def was_voted(self):
@@ -66,6 +70,7 @@ class PlateUser(account_models.ModelBase):
         max_length=1,
         null=True,
     )
+    history = HistoricalRecords()
 
     class Meta:
         db_table = "plate_user"
@@ -83,6 +88,7 @@ class EventVoting(account_models.ModelBase):
         unique=True,
         error_messages={"unique": messages.VOTING_ALREADY_EXISTS},
     )
+    history = HistoricalRecords()
 
     @property
     def was_voted(self):
@@ -96,6 +102,7 @@ class VotingPlate(account_models.ModelBase):
     plate = models.ForeignKey(to=Plate, on_delete=models.DO_NOTHING, db_column="id_plate", null=False)
 
     voting = models.ForeignKey(to=EventVoting, on_delete=models.DO_NOTHING, db_column="id_voting", null=False)
+    history = HistoricalRecords()
 
     class Meta:
         db_table = "voting_plate"
@@ -115,6 +122,7 @@ class VotingUser(account_models.ModelBase):
     plate = models.ForeignKey(
         to=Plate, on_delete=models.DO_NOTHING, db_column="id_plate", related_name="voting_user_plate", null=True
     )
+    history = HistoricalRecords()
 
     objects = managers.VotingUserManager()
 
@@ -127,6 +135,7 @@ class ResumeVote(account_models.ModelBase):
     voting = models.ForeignKey(to=EventVoting, on_delete=models.DO_NOTHING, db_column="id_voting", null=True)
     plate = models.ForeignKey(to=Plate, on_delete=models.DO_NOTHING, db_column="id_plate", null=True)
     quantity = models.IntegerField(null=True, db_column="quantity_vote", default=0, blank=True)
+    history = HistoricalRecords()
 
     class Meta:
         db_table = "resume_vote"
