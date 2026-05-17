@@ -13,6 +13,8 @@ import os
 from datetime import timedelta
 from os.path import exists, join
 
+from django.urls import reverse_lazy
+from django.utils.translation import gettext_lazy as _
 from dotenv import load_dotenv
 
 # BASE_DIR = Path(__file__).resolve().parent.parent
@@ -36,6 +38,9 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
+    "unfold",
+    "unfold.contrib.filters",
+    "unfold.contrib.simple_history",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -51,6 +56,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "storages",
     "django.contrib.postgres",
+    "simple_history",
     "drf_spectacular",
     "drf_spectacular_sidecar",
 ]
@@ -64,6 +70,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "corsheaders.middleware.CorsMiddleware",
+    "simple_history.middleware.HistoryRequestMiddleware",
 ]
 
 ROOT_URLCONF = "votup.urls"
@@ -273,3 +280,116 @@ AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")
 AWS_S3_ENDPOINT_URL = os.environ.get("AWS_S3_ENDPOINT_URL")
+
+# Unfold Admin Configuration
+UNFOLD = {
+    "SITE_TITLE": "Votup Admin",
+    "SITE_HEADER": "Votup",
+    "SITE_SYMBOL": "how_to_vote",
+    "SHOW_HISTORY": True,
+    "SIDEBAR": {
+        "show_search": True,
+        "command_search": True,
+        "navigation": [
+            {
+                "title": _("Votação"),
+                "icon": "how_to_vote",
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Eventos de Votação"),
+                        "icon": "event",
+                        "link": reverse_lazy(
+                            "admin:core_eventvoting_changelist"
+                        ),
+                    },
+                    {
+                        "title": _("Votos"),
+                        "icon": "how_to_reg",
+                        "link": reverse_lazy(
+                            "admin:core_votinguser_changelist"
+                        ),
+                    },
+                    {
+                        "title": _("Chapas na Votação"),
+                        "icon": "ballot",
+                        "link": reverse_lazy(
+                            "admin:core_votingplate_changelist"
+                        ),
+                    },
+                    {
+                        "title": _("Resumo de Votos"),
+                        "icon": "bar_chart",
+                        "link": reverse_lazy(
+                            "admin:core_resumevote_changelist"
+                        ),
+                    },
+                ],
+            },
+            {
+                "title": _("Pessoas"),
+                "icon": "people",
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Eleitores"),
+                        "icon": "person",
+                        "link": reverse_lazy("admin:core_voter_changelist"),
+                    },
+                    {
+                        "title": _("Candidatos"),
+                        "icon": "badge",
+                        "link": reverse_lazy(
+                            "admin:core_candidate_changelist"
+                        ),
+                    },
+                ],
+            },
+            {
+                "title": _("Chapas"),
+                "icon": "groups",
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Chapas"),
+                        "icon": "group",
+                        "link": reverse_lazy("admin:core_plate_changelist"),
+                    },
+                    {
+                        "title": _("Membros de Chapas"),
+                        "icon": "person_add",
+                        "link": reverse_lazy(
+                            "admin:core_plateuser_changelist"
+                        ),
+                    },
+                ],
+            },
+            {
+                "title": _("Sistema"),
+                "icon": "settings",
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Usuários"),
+                        "icon": "manage_accounts",
+                        "link": reverse_lazy(
+                            "admin:account_user_changelist"
+                        ),
+                    },
+                    {
+                        "title": _("Grupos"),
+                        "icon": "admin_panel_settings",
+                        "link": reverse_lazy("admin:auth_group_changelist"),
+                    },
+                    {
+                        "title": _("Tokens"),
+                        "icon": "key",
+                        "link": reverse_lazy(
+                            "admin:authtoken_tokenproxy_changelist"
+                        ),
+                    },
+                ],
+            },
+        ],
+    },
+}

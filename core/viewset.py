@@ -8,7 +8,6 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
-from reversion import revisions
 
 from account import actions, exceptions, messages, models, params_serializer
 
@@ -52,16 +51,12 @@ class ViewSetPermissions(ViewSet):
 
 class ViewSetBase(viewsets.ModelViewSet, mixins.ViewSetExpandMixin):
     def create(self, request, *args, **kwargs):
-        with transaction.atomic(), revisions.create_revision():
-            revisions.set_user(request.user)
-            revisions.set_comment("CREATE")
+        with transaction.atomic():
             logger.info(f"Creating {self.queryset.model.__name__} by user {request.user}")
             return super().create(request, *args, **kwargs)
 
     def update(self, request, *args, **kwargs):
-        with transaction.atomic(), revisions.create_revision():
-            revisions.set_user(request.user)
-            revisions.set_comment("UPDATE")
+        with transaction.atomic():
             logger.info(f"Updating {self.queryset.model.__name__} by user {request.user}")
             return super().update(request, *args, **kwargs)
 

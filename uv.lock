@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = ">=3.12"
 
 [[package]]
@@ -246,18 +246,6 @@ wheels = [
 ]
 
 [[package]]
-name = "django-reversion"
-version = "5.1.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "django" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/d8/aa/d7e9d98b23041b24d2b35cefcbbfa51e6e557e8e58c1c1bddabdb0baf13f/django_reversion-5.1.0.tar.gz", hash = "sha256:3309821e5b6fceedcce6b6975f1a9c7fab6ae7c7d0e1276a90e345946fa0dcb8", size = 73178, upload-time = "2024-08-09T21:30:29.613Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/5a/84/898fec51294e6764ab5fdde5db079ca89d528cef039c05447ca41d6f4c74/django_reversion-5.1.0-py3-none-any.whl", hash = "sha256:084d4f117d9e2b4e8dfdfaad83ebb34410a03eed6071c96089e6811fdea82ad3", size = 84857, upload-time = "2024-08-09T21:30:27.761Z" },
-]
-
-[[package]]
 name = "django-seed"
 version = "0.3.1"
 source = { registry = "https://pypi.org/simple" }
@@ -269,6 +257,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/5a/19/0423c1a8adb10c9e246f3a0e661165a7851bb7f4253eb338624081343e76/django-seed-0.3.1.tar.gz", hash = "sha256:93e65d2c10449c464b83e9031be02763ec10e786aa064d649c4dd5ad06fa0eea", size = 18336, upload-time = "2021-10-08T16:30:29.522Z" }
 
 [[package]]
+name = "django-simple-history"
+version = "3.11.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a8/11/410049f1454b99a78f719d3403fc89437c2a38ee092e939d5ab8d4846738/django_simple_history-3.11.0.tar.gz", hash = "sha256:2c587479cf2c3071e9aa555d0d11b73676994db4910770958f57659ade2deffe", size = 234862, upload-time = "2025-12-11T13:50:55.022Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6e/c2/e9854a3438cfc80891ab4d3826b7c61a0fe5ba3a4da89104a8f5c9afb5df/django_simple_history-3.11.0-py3-none-any.whl", hash = "sha256:f3c298db49e418ffce7fb709a5e83108452ea2179ec5c4b9232484c25427192a", size = 81868, upload-time = "2025-12-11T13:50:53.71Z" },
+]
+
+[[package]]
 name = "django-storages"
 version = "1.14.6"
 source = { registry = "https://pypi.org/simple" }
@@ -278,6 +278,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/ff/d6/2e50e378fff0408d558f36c4acffc090f9a641fd6e084af9e54d45307efa/django_storages-1.14.6.tar.gz", hash = "sha256:7a25ce8f4214f69ac9c7ce87e2603887f7ae99326c316bc8d2d75375e09341c9", size = 87587, upload-time = "2025-04-02T02:34:55.103Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/1f/21/3cedee63417bc5553eed0c204be478071c9ab208e5e259e97287590194f1/django_storages-1.14.6-py3-none-any.whl", hash = "sha256:11b7b6200e1cb5ffcd9962bd3673a39c7d6a6109e8096f0e03d46fab3d3aabd9", size = 33095, upload-time = "2025-04-02T02:34:53.291Z" },
+]
+
+[[package]]
+name = "django-unfold"
+version = "0.93.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/95/55/0649c4e7b540528f80078c300db7ae299502f3c2fccd4d6882193fa104d1/django_unfold-0.93.0.tar.gz", hash = "sha256:bce719989d199484c989e4042f338c287394c4562af05785f4fa511a8e3be859", size = 1124076, upload-time = "2026-05-11T10:13:07.855Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/8f/6c/c6c63af9eaabf85877005ba307a7af80088e9d28efd77c6431ec8c61c3c3/django_unfold-0.93.0-py3-none-any.whl", hash = "sha256:d0a09ebe906278fa994d6eb808880ba3f24c20d8c3a5ca37f82ee89969fd459c", size = 1249541, upload-time = "2026-05-11T10:13:09.185Z" },
 ]
 
 [[package]]
@@ -1116,9 +1128,10 @@ dependencies = [
     { name = "django" },
     { name = "django-cors-headers" },
     { name = "django-filter" },
-    { name = "django-reversion" },
     { name = "django-seed" },
+    { name = "django-simple-history" },
     { name = "django-storages" },
+    { name = "django-unfold" },
     { name = "djangorestframework-simplejwt" },
     { name = "drf-flex-fields" },
     { name = "drf-spectacular", extra = ["sidecar"] },
@@ -1154,9 +1167,10 @@ requires-dist = [
     { name = "django", specifier = ">=5.2.1" },
     { name = "django-cors-headers", specifier = ">=4.7.0" },
     { name = "django-filter", specifier = ">=25.1" },
-    { name = "django-reversion", specifier = ">=5.1.0" },
     { name = "django-seed", specifier = ">=0.3.1" },
+    { name = "django-simple-history", specifier = ">=3.8.0" },
     { name = "django-storages", specifier = ">=1.14.6" },
+    { name = "django-unfold", specifier = ">=0.93.0" },
     { name = "djangorestframework-simplejwt", specifier = ">=5.4.0" },
     { name = "drf-flex-fields", specifier = ">=1.0.2" },
     { name = "drf-spectacular", extras = ["sidecar"], specifier = ">=0.28.0" },
