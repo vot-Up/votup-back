@@ -1,7 +1,8 @@
 from botocore.exceptions import ClientError
 from django.core.files.base import ContentFile
 from django.db import transaction
-from account import models, exceptions
+
+from account import exceptions, models
 
 
 class UserActions:
@@ -9,7 +10,7 @@ class UserActions:
     @transaction.atomic
     def create_avatar(**kwargs):
         try:
-            for item in kwargs.get('avatar'):
+            for item in kwargs.get("avatar"):
                 avatar = models.User()
                 avatar.avatar = ContentFile(name=item.name, content=item.read())
                 avatar.file_name = item.name

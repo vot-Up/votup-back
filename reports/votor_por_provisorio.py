@@ -1,13 +1,15 @@
+import datetime
+
+from django.db import connection
+from django.http import HttpResponse
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
-from django.http import HttpResponse
-from django.db import connection
-import datetime
 
 
 def generate_provisional_vote_report(request, event_id: int):
     with connection.cursor() as cursor:
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT ev.description,
                    p.name,
                    v.quantity_vote
@@ -15,7 +17,9 @@ def generate_provisional_vote_report(request, event_id: int):
             INNER JOIN plate p ON v.id_plate = p.id
             INNER JOIN event_voting ev ON v.id_voting = ev.id
             WHERE ev.id = %s
-        """, [event_id])
+        """,
+            [event_id],
+        )
         rows = cursor.fetchall()
 
     if not rows:
@@ -23,8 +27,8 @@ def generate_provisional_vote_report(request, event_id: int):
 
     description = rows[0][0]
 
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="resultado_provisorio.pdf"'
+    response = HttpResponse(content_type="application/pdf")
+    response["Content-Disposition"] = 'attachment; filename="resultado_provisorio.pdf"'
 
     p = canvas.Canvas(response, pagesize=A4)
     width, height = A4

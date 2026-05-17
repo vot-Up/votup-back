@@ -1,11 +1,13 @@
+from django.db import connection
+from django.http import HttpResponse
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
-from django.http import HttpResponse
-from django.db import connection
 
-def generate_vote_report(request, event_id):
+
+def generate_vote_report(event_id):
     with connection.cursor() as cursor:
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT ev.description, p.name, COUNT(*) 
             FROM voting_user v
             INNER JOIN event_voting ev ON ev.id = v.id_voting
@@ -13,11 +15,13 @@ def generate_vote_report(request, event_id):
             WHERE ev.id = %s
             GROUP BY ev.description, p.name
             ORDER BY p.name DESC
-        """, [event_id])
+        """,
+            [event_id],
+        )
         rows = cursor.fetchall()
 
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="resultado_votacao.pdf"'
+    response = HttpResponse(content_type="application/pdf")
+    response["Content-Disposition"] = 'attachment; filename="resultado_votacao.pdf"'
 
     p = canvas.Canvas(response, pagesize=A4)
     width, height = A4

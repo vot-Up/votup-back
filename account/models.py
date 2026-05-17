@@ -4,7 +4,7 @@ from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 
-from account import messages, managers
+from account import managers, messages
 
 
 def generate_filename(instance, filename):
@@ -15,47 +15,27 @@ def generate_filename(instance, filename):
 
 
 def upload_to(instance, filename):
-    return f'media/{generate_filename(instance, filename)}'
+    return f"media/{generate_filename(instance, filename)}"
 
 
 # Create your models here.
 class User(AbstractBaseUser, PermissionsMixin):
     username = None
     cellphone = models.CharField(
-        null=True,
-        max_length=64,
-        unique=True,
-        error_messages={'unique': messages.CELLPHONE_ALREADY_EXISTS}
+        null=True, max_length=64, unique=True, error_messages={"unique": messages.CELLPHONE_ALREADY_EXISTS}
     )
     password = models.CharField(
         null=False,
         max_length=104,
     )
-    name = models.CharField(
-        null=True,
-        max_length=256
-    )
+    name = models.CharField(null=True, max_length=256)
     email = models.EmailField(
-        null=True,
-        max_length=256,
-        unique=True,
-        error_messages={'unique': messages.EMAIL_ALREADY_EXISTS}
+        null=True, max_length=256, unique=True, error_messages={"unique": messages.EMAIL_ALREADY_EXISTS}
     )
-    last_login = models.DateTimeField(
-        null=True
-    )
-    is_superuser = models.BooleanField(
-        null=True,
-        default=False
-    )
-    is_staff = models.BooleanField(
-        null=True,
-        default=False
-    )
-    avatar = models.ImageField(
-        upload_to=upload_to,
-        null=True
-    )
+    last_login = models.DateTimeField(null=True)
+    is_superuser = models.BooleanField(null=True, default=False)
+    is_staff = models.BooleanField(null=True, default=False)
+    avatar = models.ImageField(upload_to=upload_to, null=True)
     file_name = models.CharField(null=True)
     created_at = models.DateTimeField(
         auto_now_add=True,
@@ -65,18 +45,15 @@ class User(AbstractBaseUser, PermissionsMixin):
         auto_now=True,
         null=True,
     )
-    is_active = models.BooleanField(
-        null=False,
-        default=True
-    )
+    is_active = models.BooleanField(null=False, default=True)
 
     objects = managers.UserManager()
 
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['name', 'cellphone', 'password']
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["name", "cellphone", "password"]
 
     class Meta:
-        db_table = 'user'
+        db_table = "user"
         managed = True
 
 
@@ -101,4 +78,4 @@ class ModelBase(models.Model):
     class Meta:
         abstract = True
         managed = True
-        default_permissions = ('add', 'change', 'delete', 'view')
+        default_permissions = ("add", "change", "delete", "view")

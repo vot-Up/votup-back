@@ -4,51 +4,68 @@ from copy import deepcopy
 
 class ViewSetExpandMixin:
     def make_queryset_expandable(self, request):
-        expand_fields = request.query_params.get('expand', None)
+        expand_fields = request.query_params.get("expand", None)
         if not expand_fields:
             return
 
         serializer_class = deepcopy(self.serializer_class)
+
         if "~all" in expand_fields or "*" in expand_fields:
-            expand_fields = ','.join(serializer_class.expandable_fields)
+            expand_fields = ",".join(serializer_class.expandable_fields)
 
-        for expand in expand_fields.split(','):
-            previous_source = ''
-            previous_field = None
-            found_many = False
-            for expend_object in expand.split('.'):
-                field = expend_object.strip()
-                if previous_source == '':
-                    settings = serializer_class.expandable_fields[field][1]
-                else:
-                    serializer_class_full_name = serializer_class.expandable_fields[previous_field][0]
-                    pieces = serializer_class_full_name.split(".")
-                    class_name = pieces.pop()
+        for expand in expand_fields.split(","):
+            self.queryset = self._apply_expansion(serializer_class, expand.strip())
 
-                    if pieces[len(pieces) - 1] != "serializers":
-                        pieces.append("serializers")
+    def _apply_expansion(self, serializer_class, expand):
+        previous_source = ""
+        previous_field = None
+        found_many = False
+        queryset = self.queryset
 
-                    module = importlib.import_module(".".join(pieces))
-                    serializer_class = getattr(module, class_name)
-                    settings = serializer_class.expandable_fields[field][1]
+        for nested_field in expand.split("."):
+            field = nested_field.strip()
 
-                source = settings.get('source', field)
-                many = settings.get('many', False)
-                if many:
-                    if previous_source == '':
-                        self.queryset = self.queryset.prefetch_related(source)
-                    else:
-                        self.queryset = self.queryset.prefetch_related('{}{}'.format(previous_source, source))
-                else:
-                    if found_many is True:
-                        self.queryset = self.queryset.prefetch_related('{}{}'.format(previous_source, source))
-                    elif previous_source == '':
-                        self.queryset = self.queryset.select_related(source)
-                    else:
-                        self.queryset = self.queryset.select_related('{}{}'.format(previous_source, source))
-                previous_source += '{}__'.format(source)
-                previous_field = field
-                if not found_many:
-                    found_many = many
-            # reset serializer to the main one
-            serializer_class = deepcopy(self.serializer_class)
+            settings = self._get_field_settings(serializer_class, previous_field, field)
+            source = settings.get("source", field)
+            many = settings.get("many", False)
+
+            related_path = f"{previous_source}{source}" if previous_source else source
+
+            if many or found_many:
+                queryset = queryset.prefetch_related(related_path)
+            else:
+                queryset = queryset.select_related(related_path)
+
+            previous_source += f"{source}__"
+            previous_field = field
+            serializer_class = self._get_serializer_class(serializer_class, previous_field)
+
+            if not found_many:
+                found_many = many
+
+        return queryset
+
+    def _get_field_settings(self, serializer_class, previous_field, field):
+        if not previous_field:
+            return serializer_class.expandable_fields[field][1]
+        serializer_path = serializer_class.expandable_fields[previous_field][0]
+        pieces = serializer_path.split(".")
+        class_name = pieces.pop()
+
+        if pieces[-1] != "serializers":
+            pieces.append("serializers")
+
+        module = importlib.import_module(".".join(pieces))
+        nested_serializer_class = getattr(module, class_name)
+        return nested_serializer_class.expandable_fields[field][1]
+
+    def _get_serializer_class(self, serializer_class, previous_field):
+        serializer_path = serializer_class.expandable_fields[previous_field][0]
+        pieces = serializer_path.split(".")
+        class_name = pieces.pop()
+
+        if pieces[-1] != "serializers":
+            pieces.append("serializers")
+
+        module = importlib.import_module(".".join(pieces))
+        return getattr(module, class_name)

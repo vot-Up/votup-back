@@ -32,11 +32,7 @@ class ActiveOrCloseVoteParamSerializer(serializers.Serializer):
 
 
 class UserSerializerParams(serializers.Serializer):
-    avatar = serializers.ListField(
-        child=serializers.FileField(),
-        required=False,
-        allow_null=True
-    )
+    avatar = serializers.ListField(child=serializers.FileField(), required=False, allow_null=True)
 
 
 class ResetPasswordSerializerParams(serializers.Serializer):

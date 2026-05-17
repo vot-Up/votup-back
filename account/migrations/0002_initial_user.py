@@ -8,17 +8,14 @@ from account.models import User
 class Migration(migrations.Migration):
     def create_initial_user(apps, schema_editor):
         User.objects.create_superuser(
-            email='admin@gmail.com',
-            cellphone='00000000000',
-            password=base64.b64decode('VHdJdTdhbjQzQHYx'.encode()).decode(),
-            name='admin',
+            email="admin@gmail.com",
+            cellphone="00000000000",
+            password=base64.b64decode("VHdJdTdhbjQzQHYx".encode()).decode(),
+            name="admin",
         )
 
-    dependencies = [
-        ('account', '0001_initial')
-    ]
+    dependencies = [("account", "0001_initial")]
 
     operations = [
         migrations.RunPython(create_initial_user),
-
     ]
