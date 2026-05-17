@@ -1,5 +1,5 @@
 ---
-status: pending
+status: completed
 title: Configure account admin and system models
 type: backend
 complexity: low
@@ -31,10 +31,10 @@ Register the custom User model with an Unfold-based ModelAdmin in `account/admin
 </requirements>
 
 ## Subtasks
-- [ ] 5.1 Create UserAdmin in `account/admin.py` with Unfold ModelAdmin base
-- [ ] 5.2 Verify Group and TokenProxy are visible in admin (auto-registered)
-- [ ] 5.3 Write unit tests for UserAdmin registration
-- [ ] 5.4 Verify admin URLs for User, Group, and TokenProxy load correctly
+- [x] 5.1 Create UserAdmin in `account/admin.py` with Unfold ModelAdmin base
+- [x] 5.2 Verify Group and TokenProxy are visible in admin (auto-registered)
+- [x] 5.3 Write unit tests for UserAdmin registration
+- [x] 5.4 Verify admin URLs for User, Group, and TokenProxy load correctly
 
 ## Implementation Details
 See TechSpec "Admin Registrations > account/admin.py" section for UserAdmin structure. Group is auto-registered by `django.contrib.auth` and TokenProxy by `rest_framework.authtoken`. Unfold styles all registered models automatically — no manual registration needed for these. The sidebar "Sistema" section configured in task_01 provides direct links to these models.
@@ -56,14 +56,14 @@ See TechSpec "Admin Registrations > account/admin.py" section for UserAdmin stru
 
 ## Tests
 - Unit tests:
-  - [ ] UserAdmin is registered for User model
-  - [ ] UserAdmin has compressed_fields=True and warn_unsaved_form=True
-  - [ ] UserAdmin list_display contains email, name, cellphone, is_staff, is_active
-  - [ ] UserAdmin search_fields contains email, name, cellphone
+  - [x] UserAdmin is registered for User model
+  - [x] UserAdmin has compressed_fields=True and warn_unsaved_form=True
+  - [x] UserAdmin list_display contains email, name, cellphone, is_staff, is_active
+  - [x] UserAdmin search_fields contains email, name, cellphone
 - Integration tests:
-  - [ ] `/admin/account/user/` changelist loads
-  - [ ] `/admin/auth/group/` changelist loads
-  - [ ] `/admin/authtoken/tokenproxy/` changelist loads
+  - [x] `/admin/account/user/` changelist loads
+  - [x] `/admin/auth/group/` changelist loads
+  - [x] `/admin/authtoken/tokenproxy/` changelist loads
 - Test coverage target: >=80%
 
 ## Success Criteria

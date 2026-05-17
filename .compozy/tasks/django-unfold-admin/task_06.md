@@ -1,5 +1,5 @@
 ---
-status: pending
+status: completed
 title: Final validation and manual verification
 type: test
 complexity: low
@@ -36,15 +36,15 @@ Run comprehensive validation after all admin implementation tasks are complete. 
 </requirements>
 
 ## Subtasks
-- [ ] 6.1 Run `manage.py check` and `pytest` — confirm zero issues and all tests pass
-- [ ] 6.2 Verify admin sidebar shows 4 domain sections with correct models
-- [ ] 6.3 Verify each model changelist has functional search and filters
-- [ ] 6.4 Verify inlines render on Plate and EventVoting detail pages
-- [ ] 6.5 Verify custom actions appear in action dropdowns
-- [ ] 6.6 Verify dark mode toggle and command palette work
-- [ ] 6.7 Verify history tab shows on model detail pages
-- [ ] 6.8 Write integration test that verifies all ModelAdmins are registered
-- [ ] 6.9 Update MEMORY.md with completion status
+- [x] 6.1 Run `manage.py check` and `pytest` — confirm zero issues and all tests pass
+- [x] 6.2 Verify admin sidebar shows 4 domain sections with correct models
+- [x] 6.3 Verify each model changelist has functional search and filters
+- [x] 6.4 Verify inlines render on Plate and EventVoting detail pages
+- [x] 6.5 Verify custom actions appear in action dropdowns
+- [x] 6.6 Verify dark mode toggle and command palette work
+- [x] 6.7 Verify history tab shows on model detail pages
+- [x] 6.8 Write integration test that verifies all ModelAdmins are registered
+- [x] 6.9 Update MEMORY.md with completion status
 
 ## Implementation Details
 Manual verification requires running the development server (`uv run python manage.py runserver`) and logging into `/admin/` with superuser credentials. The integration test should programmatically verify that all expected models have registered ModelAdmins by checking `admin.site._registry`.

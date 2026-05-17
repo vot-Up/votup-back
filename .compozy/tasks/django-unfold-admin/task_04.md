@@ -1,5 +1,5 @@
 ---
-status: pending
+status: completed
 title: Create voting admin with inlines and actions
 type: backend
 complexity: high
@@ -38,12 +38,12 @@ Create `core/admin/voting.py` with ModelAdmins for EventVoting, VotingPlate, Vot
 </requirements>
 
 ## Subtasks
-- [ ] 4.1 Create `core/admin/voting.py` with all 4 ModelAdmins and 3 Inlines
-- [ ] 4.2 Implement activate_voting action with service call, error handling, and logging
-- [ ] 4.3 Implement close_voting action with service call, error handling, and logging
-- [ ] 4.4 Update `core/admin/__init__.py` to import voting module
-- [ ] 4.5 Write unit tests for admin registrations and action behavior
-- [ ] 4.6 Verify admin loads with inlines on EventVoting detail page
+- [x] 4.1 Create `core/admin/voting.py` with all 4 ModelAdmins and 3 Inlines
+- [x] 4.2 Implement activate_voting action with service call, error handling, and logging
+- [x] 4.3 Implement close_voting action with service call, error handling, and logging
+- [x] 4.4 Update `core/admin/__init__.py` to import voting module
+- [x] 4.5 Write unit tests for admin registrations and action behavior
+- [x] 4.6 Verify admin loads with inlines on EventVoting detail page (`manage.py check` passes)
 
 ## Implementation Details
 See TechSpec "Admin Registrations > core/admin/voting.py" section for the full structure. See TechSpec "Service Layer Integration" for the action error-handling pattern. Actions iterate over the queryset, call service functions per object, and report success/failure individually via `message_user`. Each inline uses `tab = True` for Unfold's inline tab grouping on the EventVoting change form.
