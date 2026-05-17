@@ -5,7 +5,7 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-blue.svg)](https://www.postgresql.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Sistema moderno de votação eletrônica desenvolvido com Django REST Framework, seguindo os princípios da **Arquitetura Hexagonal** para garantir alta testabilidade, manutenibilidade e flexibilidade.
+Sistema moderno de votação eletrônica desenvolvido com Django REST Framework, seguindo o padrão **Service Layer** para garantir alta testabilidade, manutenibilidade e flexibilidade.
 
 ## 📋 Funcionalidades
 
@@ -20,11 +20,11 @@ Sistema moderno de votação eletrônica desenvolvido com Django REST Framework,
 
 ## 🏗️ Arquitetura
 
-O projeto implementa a **Arquitetura Hexagonal (Ports and Adapters)**, promovendo:
+O projeto utiliza o padrão **Service Layer**, promovendo:
 
-- 🎯 **Separação de Responsabilidades** - Regras de negócio isoladas
-- 🧪 **Alta Testabilidade** - Facilita testes unitários e de integração
-- 🔌 **Baixo Acoplamento** - Componentes facilmente intercambiáveis
+- 🎯 **Separação de Responsabilidades** - Regras de negócio isoladas em services
+- 🧪 **Alta Testabilidade** - Funções simples facilitam testes unitários e de integração
+- 🔌 **Baixo Acoplamento** - Services acessam ORM diretamente, sem abstrações intermediárias
 - 📈 **Escalabilidade** - Preparado para crescimento e mudanças
 
 ```
@@ -287,7 +287,9 @@ uv run flake8 .
 ```
 
 ### ✅ Concluído
-- [x] Arquitetura hexagonal básica
+- [x] Arquitetura Service Layer
+- [x] Migração de Arquitetura Hexagonal para Service Layer
+- [x] Testes unitários para services
 - [x] Sistema de autenticação JWT
 - [x] CRUD completo de entidades
 - [x] Documentação Swagger/OpenAPI
