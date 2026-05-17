@@ -9,10 +9,13 @@ from drf_spectacular.views import (
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from account.viewset import CustomTokenObtainPairView
+from core.views.media import MediaProxyView
 
 urlpatterns = [
     path("", lambda request: redirect(reverse("api-root"))),
     path("admin/", admin.site.urls),
+    # Media proxy — serve S3 files via presigned redirect
+    path("media/<path:path>", MediaProxyView.as_view(), name="media-proxy"),
     # API URLs
     path("api/account/", include("account.urls")),
     path("api/account/token/", CustomTokenObtainPairView.as_view(), name="token_obtain_pair"),

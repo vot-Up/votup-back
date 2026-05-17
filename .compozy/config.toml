@@ -1,0 +1,13 @@
+[defaults]
+ide = "claude"
+reasoning_effort = "medium"
+access_mode = "full"
+timeout = "20m"
+auto_commit = false
+max_retries = 1
+
+[tasks]
+types = ["backend", "refactor", "test", "docs", "chore", "bugfix"]
+
+[tasks.run]
+include_completed = false

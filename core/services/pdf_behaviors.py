@@ -148,8 +148,8 @@ class VoteByPlateBehavior:
             cursor.execute(
                 """
                 SELECT ev.description, p.name, v2.name AS eleitor, v2.avatar,
-                       presidente.name AS presidente, presidente.avatar_url,
-                       vice_presidente.name AS vice_presidente, vice_presidente.avatar_url
+                       presidente.name AS presidente, presidente.avatar,
+                       vice_presidente.name AS vice_presidente, vice_presidente.avatar
                 FROM voting_user v
                 INNER JOIN event_voting ev ON ev.id = v.id_voting
                 INNER JOIN plate p ON v.id_plate = p.id
