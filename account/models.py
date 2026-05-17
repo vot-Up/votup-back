@@ -3,6 +3,7 @@ from datetime import datetime
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
+from simple_history.models import HistoricalRecords
 
 from account import managers, messages
 
@@ -15,7 +16,7 @@ def generate_filename(instance, filename):
 
 
 def upload_to(instance, filename):
-    return f"media/{generate_filename(instance, filename)}"
+    return generate_filename(instance, filename)
 
 
 # Create your models here.
@@ -46,8 +47,12 @@ class User(AbstractBaseUser, PermissionsMixin):
         null=True,
     )
     is_active = models.BooleanField(null=False, default=True)
+    history = HistoricalRecords()
 
     objects = managers.UserManager()
+
+    def __str__(self):
+        return self.name or self.email or str(self.id)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["name", "cellphone", "password"]

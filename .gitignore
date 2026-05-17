@@ -3,4 +3,11 @@
 venv
 __pycache__/
 */__pycache__
-.*
+.pytest_cache
+.ralph
+media/
+.compozy
+.ruff_cache
+.coverage
+.coveragerc
+htmlcov/
