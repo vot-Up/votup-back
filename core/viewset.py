@@ -226,7 +226,12 @@ class PlateUserViewSet(ViewSetBase, ViewSetPermissions):
     queryset = models.PlateUser.objects.all()
     serializer_class = serializers.PlateUserSerializer
     filterset_class = filters.PlateUserFilter
-    permission_classes_by_action = {"create": (AllowAny,), "partial_update": (AllowAny,), "destroy": (AllowAny,)}
+    permission_classes_by_action = {
+        "create": (AllowAny,),
+        "partial_update": (AllowAny,),
+        "destroy": (AllowAny,),
+        "delete_user_plate": (AllowAny,),
+    }
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -234,6 +239,22 @@ class PlateUserViewSet(ViewSetBase, ViewSetPermissions):
         if user.is_authenticated and not user.is_staff and user.role == "CANDIDATO":
             return queryset.filter(plate__owner=user)
         return queryset
+
+    def _check_plate_ownership(self, plate_id):
+        user = self.request.user
+        if user.is_authenticated and not user.is_staff and user.role == "CANDIDATO":
+            if not models.Plate.objects.filter(id=plate_id, owner=user).exists():
+                return Response({"detail": "Você não tem permissão para modificar esta chapa."}, status=status.HTTP_403_FORBIDDEN)
+        return None
+
+    def create(self, request, *args, **kwargs):
+        plate_url = request.data.get("plate", "")
+        plate_id = str(plate_url).rstrip("/").split("/")[-1]
+        if plate_id.isdigit():
+            ownership_error = self._check_plate_ownership(int(plate_id))
+            if ownership_error:
+                return ownership_error
+        return super().create(request, *args, **kwargs)
 
     @extend_schema(
         summary="Remover usuário da chapa",
@@ -251,10 +272,13 @@ class PlateUserViewSet(ViewSetBase, ViewSetPermissions):
     def delete_user_plate(self, request, *args, **kwargs):
         param_serializer = params_serializer.PlateUserParamSerializer(data=request.data)
         param_serializer.is_valid(raise_exception=True)
-        logger.info(
-            f"Removing user {param_serializer.validated_data['candidate']} from plate {param_serializer.validated_data['plate']}"
-        )
         data = param_serializer.validated_data
+        ownership_error = self._check_plate_ownership(data["plate"])
+        if ownership_error:
+            return ownership_error
+        logger.info(
+            f"Removing user {data['candidate']} from plate {data['plate']}"
+        )
         delete_user_plate(candidate_id=data["candidate"], plate_id=data["plate"])
         return Response(status=200)
 
