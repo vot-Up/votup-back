@@ -1,12 +1,14 @@
 # Create your views here.
+from django.db import transaction
 from drf_spectacular.utils import extend_schema_view
-from rest_framework import status
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from account import actions, exceptions, filters, messages, models, params_serializer, serializers
+from core import utils
 from core.schemas.schemas import AUTH_SCHEMAS, USER_SCHEMAS
 from core.viewset import ViewSetBase, ViewSetPermissions
 
@@ -48,3 +50,24 @@ class CustomTokenObtainPairView(TokenObtainPairView):
             raise exceptions.InvalidCredentialsException
 
         return Response(serializer.validated_data, status=status.HTTP_200_OK)
+
+
+class RegisterViewSet(viewsets.GenericViewSet):
+    serializer_class = serializers.RegisterSerializer
+    permission_classes = (AllowAny,)
+    http_method_names = ["post", "options"]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        with transaction.atomic():
+            user = serializer.save()
+        refresh = serializers.CustomTokenObtainPairSerializer.get_token(user)
+        data = {
+            "token": {
+                "refresh": str(refresh),
+                "access": str(refresh.access_token),
+            },
+            "user": utils.get_user_login(user, request=request),
+        }
+        return Response(data, status=status.HTTP_201_CREATED)

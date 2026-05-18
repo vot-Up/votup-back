@@ -21,6 +21,11 @@ def upload_to(instance, filename):
 
 # Create your models here.
 class User(AbstractBaseUser, PermissionsMixin):
+    ROLE_CHOICES = [
+        ("ELEITOR", "Eleitor"),
+        ("CANDIDATO", "Candidato"),
+    ]
+
     username = None
     cellphone = models.CharField(
         null=True, max_length=64, unique=True, error_messages={"unique": messages.CELLPHONE_ALREADY_EXISTS}
@@ -47,6 +52,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         null=True,
     )
     is_active = models.BooleanField(null=False, default=True)
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, null=True, blank=True)
     history = HistoricalRecords()
 
     objects = managers.UserManager()

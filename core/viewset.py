@@ -9,15 +9,21 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
-from account import actions, exceptions, messages, models, params_serializer
-
+from account import exceptions, messages, models, params_serializer
 from core import exceptions, filters, messages, mixins, params_serializer
 from core.models import models
 from core.schemas.schemas import REPORT_SCHEMAS, VOTER_SCHEMAS, VOTING_SCHEMAS
 from core.serializer import serializers
-
 from core.services.candidate_service import update_avatar
+from core.services.pdf_behaviors import (
+    ResumeVoterProvisory,
+    VoteByPlateBehavior,
+    VoterInPlateResume,
+    VotingUserBehavior,
+)
 from core.services.plate_service import activate_plate, delete_user_plate, delete_voting_plate
+from core.services.report_service import generate_general_vote_result
+from core.services.voter_service import get_voter
 from core.services.voting_plate_service import check_plate_associate
 from core.services.voting_service import (
     active_vote,
@@ -26,14 +32,6 @@ from core.services.voting_service import (
     get_resume_vote,
     get_voter_plate,
     get_voting_user,
-)
-from core.services.voter_service import get_voter
-from core.services.report_service import generate_general_vote_result
-from core.services.pdf_behaviors import (
-    ResumeVoterProvisory,
-    VoteByPlateBehavior,
-    VoterInPlateResume,
-    VotingUserBehavior,
 )
 
 logger = logging.getLogger(__name__)
@@ -135,6 +133,7 @@ class PlateViewSet(ViewSetBase, ViewSetPermissions):
     filterset_class = filters.PlateFilter
     permission_classes_by_action = {
         "list": (AllowAny,),
+        "retrieve": (AllowAny,),
         "create": (AllowAny,),
         "partial_update": (AllowAny,),
         "destroy": (AllowAny,),
@@ -144,10 +143,41 @@ class PlateViewSet(ViewSetBase, ViewSetPermissions):
         "-modified_at",
     )
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        user = self.request.user
+        if user.is_authenticated and not user.is_staff and user.role == "CANDIDATO":
+            return queryset.filter(owner=user)
+        return queryset
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        if user.is_authenticated and not user.is_staff and user.role == "CANDIDATO":
+            serializer.save(owner=user)
+            return
+        serializer.save()
+
     def update(self, request, *args, **kwargs):
         if request.data.get("active"):
             activate_plate(plate_id=self.get_object().id)
         return super().update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if self._is_candidate_locked_plate_request(instance):
+            return Response({"detail": "Chapa em votação."}, status=status.HTTP_403_FORBIDDEN)
+        return super().partial_update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if self._is_candidate_locked_plate_request(instance):
+            return Response({"detail": "Chapa em votação."}, status=status.HTTP_403_FORBIDDEN)
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_200_OK)
+
+    def _is_candidate_locked_plate_request(self, instance):
+        user = self.request.user
+        return user.is_authenticated and not user.is_staff and user.role == "CANDIDATO" and instance.is_linked
 
 
 @extend_schema_view(active_vote=VOTING_SCHEMAS["active_vote"], close_vote=VOTING_SCHEMAS["close_vote"])
@@ -197,6 +227,13 @@ class PlateUserViewSet(ViewSetBase, ViewSetPermissions):
     serializer_class = serializers.PlateUserSerializer
     filterset_class = filters.PlateUserFilter
     permission_classes_by_action = {"create": (AllowAny,), "partial_update": (AllowAny,), "destroy": (AllowAny,)}
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        user = self.request.user
+        if user.is_authenticated and not user.is_staff and user.role == "CANDIDATO":
+            return queryset.filter(plate__owner=user)
+        return queryset
 
     @extend_schema(
         summary="Remover usuário da chapa",

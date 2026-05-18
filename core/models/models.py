@@ -19,6 +19,13 @@ def upload_to(instance, filename):
 
 
 class Voter(account_models.ModelBase):
+    user = models.OneToOneField(
+        "account.User",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="voter_profile",
+    )
     name = models.CharField(null=True, max_length=256)
     cellphone = models.CharField(
         null=True,
@@ -37,6 +44,13 @@ class Voter(account_models.ModelBase):
 
 
 class Candidate(account_models.ModelBase):
+    user = models.OneToOneField(
+        "account.User",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="candidate_profile",
+    )
     name = models.CharField(null=True, max_length=256)
     cellphone = models.CharField(
         null=True,
@@ -56,6 +70,13 @@ class Candidate(account_models.ModelBase):
 
 
 class Plate(account_models.ModelBase):
+    owner = models.ForeignKey(
+        "account.User",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="owned_plates",
+    )
     name = models.CharField(
         null=False,
         unique=True,
@@ -70,6 +91,10 @@ class Plate(account_models.ModelBase):
     @property
     def was_voted(self):
         return VotingUser.objects.filter(plate=self.id).exists()
+
+    @property
+    def is_linked(self):
+        return VotingPlate.objects.filter(plate=self).exists()
 
     class Meta:
         db_table = "plate"

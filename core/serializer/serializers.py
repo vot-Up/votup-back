@@ -18,6 +18,7 @@ class CandidateSerializer(account_serializers.SerializerBase):
 
 class PlateSerializer(account_serializers.SerializerBase):
     was_voted = serializers.BooleanField(read_only=True)
+    is_linked = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = models.Plate
