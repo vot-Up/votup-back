@@ -5,7 +5,7 @@ services:
     image: postgres:17
     hostname: postgres-votup
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
       - POSTGRES_DB=votup
       - POSTGRES_PASSWORD=123456
